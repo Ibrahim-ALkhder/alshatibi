@@ -23,7 +23,12 @@ const AdminLogin = () => {
       if (data.role !== 'admin' && data.role !== 'staff') {
         throw new Error('غير مصرح لك بالدخول إلى لوحة الإدارة');
       }
-      // التوجيه يتم تلقائياً في App.jsx
+      // التوجيه حسب الدور
+      if (data.role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/staff/orders');
+      }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'فشل تسجيل الدخول');
     } finally {

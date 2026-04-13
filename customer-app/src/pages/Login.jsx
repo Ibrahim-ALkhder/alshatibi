@@ -19,10 +19,16 @@ const Login = () => {
 
     try {
       const data = await login(email, password);
-      if (data.role !== 'customer') {
-        throw new Error('هذه الصفحة مخصصة للعملاء فقط');
+      // التوجيه حسب الدور
+      if (data.role === 'admin') {
+        navigate('/dashboard');
+      } else if (data.role === 'staff') {
+        navigate('/staff/orders');
+      } else if (data.role === 'driver') {
+        navigate('/driver');
+      } else {
+        navigate('/');
       }
-      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'فشل تسجيل الدخول');
     } finally {

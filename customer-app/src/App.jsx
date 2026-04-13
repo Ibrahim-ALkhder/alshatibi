@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Layout from './components/Layout/Layout';
 import Home from './pages/Home';
@@ -20,66 +20,91 @@ import UsersManagement from './pages/UsersManagement';
 import DriverDashboard from './pages/DriverDashboard';
 import Loader from './components/UI/Loader';
 
+// مكونات الحماية
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <Loader fullScreen />;
+  if (!user) return <Navigate to="/login" />;
+  if (!allowedRoles.includes(user.role)) return <Navigate to="/unauthorized" />;
+
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+  const { user } = useAuth();
+  if (user) return <NavigateBasedOnRole user={user} />;
+  return children;
+};
+
 function App() {
   const { user, loading } = useAuth();
 
   if (loading) return <Loader fullScreen />;
 
-  const isCustomer = user?.role === 'customer';
-  const isStaff = user?.role === 'staff';
-  const isAdmin = user?.role === 'admin';
-  const isDriver = user?.role === 'driver';
-
   return (
     <BrowserRouter>
       <Routes>
-        {/* صفحات تسجيل الدخول العامة */}
-        <Route path="/login" element={!user ? <Login /> : <NavigateBasedOnRole user={user} />} />
-        <Route path="/admin/login" element={!user ? <AdminLogin /> : <NavigateBasedOnRole user={user} />} />
-        <Route path="/driver/login" element={!user ? <DriverLogin /> : <NavigateBasedOnRole user={user} />} />
-        <Route path="/register" element={!user ? <Register /> : <NavigateBasedOnRole user={user} />} />
+        {/* المسارات العامة */}
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/admin/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
+        <Route path="/driver/login" element={<PublicRoute><DriverLogin /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
-        {/* مسارات العميل المحمية */}
-        {isCustomer && (
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/menu/:id" element={<ItemDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/tracking/:id" element={<OrderTracking />} />
-            <Route path="/orders" element={<OrderHistory />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-        )}
+        {/* مسارات العميل */}
+        <Route path="/" element={
+          <ProtectedRoute allowedRoles={['customer']}><Layout><Home /></Layout></ProtectedRoute>
+        } />
+        <Route path="/menu" element={
+          <ProtectedRoute allowedRoles={['customer']}><Layout><Menu /></Layout></ProtectedRoute>
+        } />
+        <Route path="/menu/:id" element={
+          <ProtectedRoute allowedRoles={['customer']}><Layout><ItemDetail /></Layout></ProtectedRoute>
+        } />
+        <Route path="/cart" element={
+          <ProtectedRoute allowedRoles={['customer']}><Layout><Cart /></Layout></ProtectedRoute>
+        } />
+        <Route path="/checkout" element={
+          <ProtectedRoute allowedRoles={['customer']}><Layout><Checkout /></Layout></ProtectedRoute>
+        } />
+        <Route path="/tracking/:id" element={
+          <ProtectedRoute allowedRoles={['customer', 'staff', 'admin', 'driver']}><Layout><OrderTracking /></Layout></ProtectedRoute>
+        } />
+        <Route path="/orders" element={
+          <ProtectedRoute allowedRoles={['customer']}><Layout><OrderHistory /></Layout></ProtectedRoute>
+        } />
 
-        {/* مسارات الموظف والمدير المحمية */}
-        {(isStaff || isAdmin) && (
-          <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to={isAdmin ? "/dashboard" : "/staff/orders"} />} />
-            <Route path="/staff/orders" element={<StaffOrders />} />
-            <Route path="/menu-management" element={<MenuManagement />} />
-            {isAdmin && (
-              <>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/users" element={<UsersManagement />} />
-              </>
-            )}
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-        )}
+        {/* مسارات الموظف */}
+        <Route path="/staff/orders" element={
+          <ProtectedRoute allowedRoles={['staff', 'admin']}><Layout><StaffOrders /></Layout></ProtectedRoute>
+        } />
+        <Route path="/menu-management" element={
+          <ProtectedRoute allowedRoles={['staff', 'admin']}><Layout><MenuManagement /></Layout></ProtectedRoute>
+        } />
 
-        {/* مسارات المندوب المحمية */}
-        {isDriver && (
-          <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/driver" />} />
-            <Route path="/driver" element={<DriverDashboard />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-        )}
+        {/* مسارات المدير */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute allowedRoles={['admin']}><Layout><Dashboard /></Layout></ProtectedRoute>
+        } />
+        <Route path="/users" element={
+          <ProtectedRoute allowedRoles={['admin']}><Layout><UsersManagement /></Layout></ProtectedRoute>
+        } />
 
-        {/* تحويل أي مسار غير معروف إلى الصفحة الافتراضية حسب الدور */}
-        <Route path="*" element={<NavigateToRoleDefault user={user} />} />
+        {/* مسارات المندوب */}
+        <Route path="/driver" element={
+          <ProtectedRoute allowedRoles={['driver']}><Layout><DriverDashboard /></Layout></ProtectedRoute>
+        } />
+
+        {/* ملف التعريف - متاح للجميع */}
+        <Route path="/profile" element={
+          <ProtectedRoute allowedRoles={['customer', 'staff', 'admin', 'driver']}><Layout><Profile /></Layout></ProtectedRoute>
+        } />
+
+        {/* صفحة غير مصرح */}
+        <Route path="/unauthorized" element={<div className="p-8 text-center"><h1 className="text-2xl font-bold text-red-600">غير مصرح لك بالدخول هنا</h1><Link to="/" className="text-primary-600 mt-4 inline-block">العودة للرئيسية</Link></div>} />
+
+        {/* تحويل أي مسار غير معروف */}
+        <Route path="*" element={<NavigateToRoleDefault />} />
       </Routes>
     </BrowserRouter>
   );
@@ -93,7 +118,8 @@ const NavigateBasedOnRole = ({ user }) => {
   return <Navigate to="/" />;
 };
 
-const NavigateToRoleDefault = ({ user }) => {
+const NavigateToRoleDefault = () => {
+  const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
   if (user.role === 'admin') return <Navigate to="/dashboard" />;
   if (user.role === 'staff') return <Navigate to="/staff/orders" />;
