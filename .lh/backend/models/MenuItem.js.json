@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/models/MenuItem.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776019732035,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776020170875,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -9,9 +9,9 @@\n     price: { type: Number, required: true },\r\n     image: String,\r\n     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },\r\n     isAvailable: { type: Boolean, default: true },\r\n-    stock: { type: Number, default: 0, min: 0 }, // ⚠️ حقل المخزون\r\n+    stock: { type: Number, default: 0, min: 0 },\r\n     preparationTime: { type: Number, default: 15 },\r\n     options: [\r\n       {\r\n         name: String,\r\n@@ -28,15 +28,16 @@\n   },\r\n   { timestamps: true }\r\n );\r\n \r\n-menuItemSchema.pre('save', function (next) {\r\n+// استخدم async function بدون next\r\n+menuItemSchema.pre('save', async function () {\r\n+  // تأكد من تحديث isAvailable بناءً على المخزون\r\n   if (this.stock <= 0) {\r\n     this.isAvailable = false;\r\n   } else {\r\n     this.isAvailable = true;\r\n   }\r\n-  next();\r\n });\r\n \r\n const MenuItem = mongoose.model('MenuItem', menuItemSchema);\r\n export default MenuItem;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776019732035,
+            "name": "Commit-0",
+            "content": "import mongoose from 'mongoose';\r\n\r\nconst menuItemSchema = mongoose.Schema(\r\n  {\r\n    name: { type: String, required: true },\r\n    nameAr: { type: String, required: true },\r\n    description: String,\r\n    descriptionAr: String,\r\n    price: { type: Number, required: true },\r\n    image: String,\r\n    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },\r\n    isAvailable: { type: Boolean, default: true },\r\n    stock: { type: Number, default: 0, min: 0 }, // ⚠️ حقل المخزون\r\n    preparationTime: { type: Number, default: 15 },\r\n    options: [\r\n      {\r\n        name: String,\r\n        nameAr: String,\r\n        choices: [\r\n          {\r\n            name: String,\r\n            nameAr: String,\r\n            price: Number,\r\n          },\r\n        ],\r\n      },\r\n    ],\r\n  },\r\n  { timestamps: true }\r\n);\r\n\r\nmenuItemSchema.pre('save', function (next) {\r\n  if (this.stock <= 0) {\r\n    this.isAvailable = false;\r\n  } else {\r\n    this.isAvailable = true;\r\n  }\r\n  next();\r\n});\r\n\r\nconst MenuItem = mongoose.model('MenuItem', menuItemSchema);\r\nexport default MenuItem;"
+        }
+    ]
+}

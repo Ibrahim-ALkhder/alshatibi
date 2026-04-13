@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/services/socket.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776010481154,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776010481154,
+            "name": "Commit-0",
+            "content": "import { io } from 'socket.io-client';\r\n\r\nexport const createSocket = (token) => {\r\n  return io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {\r\n    auth: { token },\r\n  });\r\n};"
+        }
+    ]
+}

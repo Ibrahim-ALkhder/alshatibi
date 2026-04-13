@@ -1,0 +1,26 @@
+{
+    "sourceFile": "backend/routes/orderRoutes.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1776008967575,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776012910667,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -27,8 +27,13 @@\n   router.route('/:id/status').put(protect, admin, async (req, res) => {\r\n     // Wrap to inject io into request for controller to use\r\n     req.app.set('io', io);\r\n     await updateOrderStatus(req, res);\r\n+\r\n+    // Inside the exported function that receives io\r\n+router.route('/stats/summary').get(protect, admin, getOrderStats);\r\n+router.route('/stats/daily').get(protect, admin, getDailyStats);\r\n+router.route('/export').get(protect, admin, getOrdersForExport);\r\n   });\r\n \r\n   return router;\r\n };\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776026920543,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -5,35 +5,34 @@\n   updateOrderToPaid,\r\n   updateOrderStatus,\r\n   getMyOrders,\r\n   getOrders,\r\n+  getOrderStats,\r\n+  getDailyStats,\r\n+  getOrdersForExport,\r\n } from '../controllers/orderController.js';\r\n import { protect, admin } from '../middleware/authMiddleware.js';\r\n \r\n const router = express.Router();\r\n \r\n-// We'll pass io via a closure\r\n export default (io) => {\r\n   router.route('/')\r\n     .post(protect, addOrderItems)\r\n     .get(protect, admin, getOrders);\r\n \r\n   router.route('/myorders').get(protect, getMyOrders);\r\n+  router.route('/stats/summary').get(protect, admin, getOrderStats);\r\n+  router.route('/stats/daily').get(protect, admin, getDailyStats);\r\n+  router.route('/export').get(protect, admin, getOrdersForExport);\r\n \r\n   router.route('/:id')\r\n     .get(protect, getOrderById);\r\n \r\n   router.route('/:id/pay').put(protect, updateOrderToPaid);\r\n \r\n   router.route('/:id/status').put(protect, admin, async (req, res) => {\r\n-    // Wrap to inject io into request for controller to use\r\n     req.app.set('io', io);\r\n     await updateOrderStatus(req, res);\r\n-\r\n-    // Inside the exported function that receives io\r\n-router.route('/stats/summary').get(protect, admin, getOrderStats);\r\n-router.route('/stats/daily').get(protect, admin, getDailyStats);\r\n-router.route('/export').get(protect, admin, getOrdersForExport);\r\n   });\r\n \r\n   return router;\r\n };\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776008967575,
+            "name": "Commit-0",
+            "content": "import express from 'express';\r\nimport {\r\n  addOrderItems,\r\n  getOrderById,\r\n  updateOrderToPaid,\r\n  updateOrderStatus,\r\n  getMyOrders,\r\n  getOrders,\r\n} from '../controllers/orderController.js';\r\nimport { protect, admin } from '../middleware/authMiddleware.js';\r\n\r\nconst router = express.Router();\r\n\r\n// We'll pass io via a closure\r\nexport default (io) => {\r\n  router.route('/')\r\n    .post(protect, addOrderItems)\r\n    .get(protect, admin, getOrders);\r\n\r\n  router.route('/myorders').get(protect, getMyOrders);\r\n\r\n  router.route('/:id')\r\n    .get(protect, getOrderById);\r\n\r\n  router.route('/:id/pay').put(protect, updateOrderToPaid);\r\n\r\n  router.route('/:id/status').put(protect, admin, async (req, res) => {\r\n    // Wrap to inject io into request for controller to use\r\n    req.app.set('io', io);\r\n    await updateOrderStatus(req, res);\r\n  });\r\n\r\n  return router;\r\n};"
+        }
+    ]
+}

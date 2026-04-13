@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/socket/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776008931701,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776008931701,
+            "name": "Commit-0",
+            "content": "import { Server } from 'socket.io';\r\nimport jwt from 'jsonwebtoken';\r\nimport User from '../models/User.js';\r\n\r\nexport const initSocket = (httpServer) => {\r\n  const io = new Server(httpServer, {\r\n    cors: {\r\n      origin: ['http://localhost:5173', 'http://localhost:5174'],\r\n      credentials: true,\r\n    },\r\n  });\r\n\r\n  io.use(async (socket, next) => {\r\n    const token = socket.handshake.auth.token;\r\n    if (!token) {\r\n      return next(new Error('Authentication error'));\r\n    }\r\n    try {\r\n      const decoded = jwt.verify(token, process.env.JWT_SECRET);\r\n      const user = await User.findById(decoded.id).select('-password');\r\n      if (!user) {\r\n        return next(new Error('User not found'));\r\n      }\r\n      socket.user = user;\r\n      next();\r\n    } catch (err) {\r\n      next(new Error('Invalid token'));\r\n    }\r\n  });\r\n\r\n  io.on('connection', (socket) => {\r\n    console.log(`User connected: ${socket.user._id}`);\r\n\r\n    socket.join(socket.user._id.toString());\r\n\r\n    if (socket.user.role === 'admin') {\r\n      socket.join('admin');\r\n    }\r\n\r\n    socket.on('disconnect', () => {\r\n      console.log(`User disconnected: ${socket.user._id}`);\r\n    });\r\n  });\r\n\r\n  return io;\r\n};"
+        }
+    ]
+}

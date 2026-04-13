@@ -1,0 +1,46 @@
+{
+    "sourceFile": "backend/routes/driverRoutes.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 7,
+            "patches": [
+                {
+                    "date": 1776060906842,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776062514337,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,11 +1,18 @@\n import express from 'express';\r\n import { protect } from '../middleware/authMiddleware.js';\r\n-import { getDriverOrders, markOrderDelivered } from '../controllers/orderController.js';\r\n+import {\r\n+  getDriverOrders,\r\n+  markOrderDelivered,\r\n+  updateDriverStatus,\r\n+  getDriverStatus,\r\n+} from '../controllers/orderController.js';\r\n \r\n const router = express.Router();\r\n \r\n router.use(protect);\r\n+\r\n router.get('/orders', getDriverOrders);\r\n router.put('/orders/:id/deliver', markOrderDelivered);\r\n+router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n \r\n export default router;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776063406776,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -5,8 +5,9 @@\n   markOrderDelivered,\r\n   updateDriverStatus,\r\n   getDriverStatus,\r\n } from '../controllers/orderController.js';\r\n+router.post('/ensure-profile', ensureDriverProfile);\r\n \r\n const router = express.Router();\r\n \r\n router.use(protect);\r\n"
+                },
+                {
+                    "date": 1776063423120,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -0,0 +1,19 @@\n+import express from 'express';\r\n+import { protect } from '../middleware/authMiddleware.js';\r\n+import {\r\n+  getDriverOrders,\r\n+  markOrderDelivered,\r\n+  updateDriverStatus,\r\n+  getDriverStatus,\r\n+} from '../controllers/orderController.js';\r\n+\r\n+\r\n+const router = express.Router();\r\n+\r\n+router.use(protect);\r\n+router.post('/ensure-profile', ensureDriverProfile);\r\n+router.get('/orders', getDriverOrders);\r\n+router.put('/orders/:id/deliver', markOrderDelivered);\r\n+router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n+\r\n+export default router;ي\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776063433186,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -0,0 +1,20 @@\n+import express from 'express';\r\n+import { protect } from '../middleware/authMiddleware.js';\r\n+import {\r\n+  getDriverOrders,\r\n+  markOrderDelivered,\r\n+  updateDriverStatus,\r\n+  getDriverStatus,\r\n+  ensureDriverProfile\r\n+} from '../controllers/orderController.js';\r\n+\r\n+\r\n+const router = express.Router();\r\n+\r\n+router.use(protect);\r\n+router.post('/ensure-profile', ensureDriverProfile);\r\n+router.get('/orders', getDriverOrders);\r\n+router.put('/orders/:id/deliver', markOrderDelivered);\r\n+router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n+\r\n+export default router;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776064385477,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,12 +1,12 @@\n import express from 'express';\r\n import { protect } from '../middleware/authMiddleware.js';\r\n import {\r\n   getDriverOrders,\r\n-  markOrderDelivered,\r\n+  updateOrderStatusByDriver,\r\n   updateDriverStatus,\r\n   getDriverStatus,\r\n-  ensureDriverProfile\r\n+  ensureDriverProfile,\r\n } from '../controllers/orderController.js';\r\n \r\n \r\n const router = express.Router();\r\n@@ -16,43 +16,5 @@\n router.get('/orders', getDriverOrders);\r\n router.put('/orders/:id/deliver', markOrderDelivered);\r\n router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n \r\n-export default router;\n-import express from 'express';\r\n-import { protect } from '../middleware/authMiddleware.js';\r\n-import {\r\n-  getDriverOrders,\r\n-  markOrderDelivered,\r\n-  updateDriverStatus,\r\n-  getDriverStatus,\r\n-} from '../controllers/orderController.js';\r\n-\r\n-\r\n-const router = express.Router();\r\n-\r\n-router.use(protect);\r\n-router.post('/ensure-profile', ensureDriverProfile);\r\n-router.get('/orders', getDriverOrders);\r\n-router.put('/orders/:id/deliver', markOrderDelivered);\r\n-router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n-\r\n-export default router;ي\n-import express from 'express';\r\n-import { protect } from '../middleware/authMiddleware.js';\r\n-import {\r\n-  getDriverOrders,\r\n-  markOrderDelivered,\r\n-  updateDriverStatus,\r\n-  getDriverStatus,\r\n-} from '../controllers/orderController.js';\r\n-router.post('/ensure-profile', ensureDriverProfile);\r\n-\r\n-const router = express.Router();\r\n-\r\n-router.use(protect);\r\n-\r\n-router.get('/orders', getDriverOrders);\r\n-router.put('/orders/:id/deliver', markOrderDelivered);\r\n-router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n-\r\n export default router;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776064392136,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,6 +15,6 @@\n router.post('/ensure-profile', ensureDriverProfile);\r\n router.get('/orders', getDriverOrders);\r\n router.put('/orders/:id/deliver', markOrderDelivered);\r\n router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n-\r\n+router.put('/orders/:id/status', updateOrderStatusByDriver);\r\n export default router;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776064446215,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -16,6 +16,6 @@\n router.get('/orders', getDriverOrders);\r\n router.put('/orders/:id/deliver', markOrderDelivered);\r\n router.route('/status').get(getDriverStatus).put(updateDriverStatus);\r\n router.put('/orders/:id/status', updateOrderStatusByDriver);\r\n-\r\n+router.get('/history', getDriverHistory);\r\n export default router;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776060906842,
+            "name": "Commit-0",
+            "content": "import express from 'express';\r\nimport { protect } from '../middleware/authMiddleware.js';\r\nimport { getDriverOrders, markOrderDelivered } from '../controllers/orderController.js';\r\n\r\nconst router = express.Router();\r\n\r\nrouter.use(protect);\r\nrouter.get('/orders', getDriverOrders);\r\nrouter.put('/orders/:id/deliver', markOrderDelivered);\r\n\r\nexport default router;"
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/routes/authRoutes.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776008946051,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776014787848,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,18 +1,11 @@\n import express from 'express';\r\n-import {\r\n-  registerUser,\r\n-  loginUser,\r\n-  getUserProfile,\r\n-  updateUserProfile,\r\n-} from '../controllers/authController.js';\r\n+import { registerUser, loginUser, getUserProfile, updateUserProfile } from '../controllers/authController.js';\r\n import { protect } from '../middleware/authMiddleware.js';\r\n \r\n const router = express.Router();\r\n \r\n router.post('/register', registerUser);\r\n router.post('/login', loginUser);\r\n-router.route('/profile')\r\n-  .get(protect, getUserProfile)\r\n-  .put(protect, updateUserProfile);\r\n+router.route('/profile').get(protect, getUserProfile).put(protect, updateUserProfile);\r\n \r\n export default router;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776008946051,
+            "name": "Commit-0",
+            "content": "import express from 'express';\r\nimport {\r\n  registerUser,\r\n  loginUser,\r\n  getUserProfile,\r\n  updateUserProfile,\r\n} from '../controllers/authController.js';\r\nimport { protect } from '../middleware/authMiddleware.js';\r\n\r\nconst router = express.Router();\r\n\r\nrouter.post('/register', registerUser);\r\nrouter.post('/login', loginUser);\r\nrouter.route('/profile')\r\n  .get(protect, getUserProfile)\r\n  .put(protect, updateUserProfile);\r\n\r\nexport default router;"
+        }
+    ]
+}

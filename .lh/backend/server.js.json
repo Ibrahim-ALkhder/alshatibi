@@ -1,0 +1,38 @@
+{
+    "sourceFile": "backend/server.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 5,
+            "patches": [
+                {
+                    "date": 1776008993175,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776013499878,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -9,9 +9,16 @@\n import orderRoutes from './routes/orderRoutes.js';\r\n import userRoutes from './routes/userRoutes.js';\r\n import { errorHandler } from './middleware/errorMiddleware.js';\r\n import { initSocket } from './socket/index.js';\r\n+import path from 'path';\r\n+import { fileURLToPath } from 'url';\r\n \r\n+const __filename = fileURLToPath(import.meta.url);\r\n+const __dirname = path.dirname(__filename);\r\n+\r\n+// جعل مجلد uploads متاحاً للوصول عبر الرابط /uploads\r\n+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));\r\n dotenv.config();\r\n connectDB();\r\n \r\n const app = express();\r\n"
+                },
+                {
+                    "date": 1776013836420,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,35 +1,37 @@\n import express from 'express';\r\n import dotenv from 'dotenv';\r\n import cors from 'cors';\r\n import { createServer } from 'http';\r\n+import path from 'path';\r\n+import { fileURLToPath } from 'url';\r\n import connectDB from './config/db.js';\r\n import authRoutes from './routes/authRoutes.js';\r\n import categoryRoutes from './routes/categoryRoutes.js';\r\n import menuRoutes from './routes/menuRoutes.js';\r\n import orderRoutes from './routes/orderRoutes.js';\r\n import userRoutes from './routes/userRoutes.js';\r\n import { errorHandler } from './middleware/errorMiddleware.js';\r\n import { initSocket } from './socket/index.js';\r\n-import path from 'path';\r\n-import { fileURLToPath } from 'url';\r\n \r\n-const __filename = fileURLToPath(import.meta.url);\r\n-const __dirname = path.dirname(__filename);\r\n-\r\n-// جعل مجلد uploads متاحاً للوصول عبر الرابط /uploads\r\n-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));\r\n dotenv.config();\r\n connectDB();\r\n \r\n-const app = express();\r\n+const app = express(); // ✅ app created first\r\n const httpServer = createServer(app);\r\n \r\n+// الحصول على __dirname في ES modules\r\n+const __filename = fileURLToPath(import.meta.url);\r\n+const __dirname = path.dirname(__filename);\r\n+\r\n // Middleware\r\n app.use(cors());\r\n app.use(express.json());\r\n app.use(express.urlencoded({ extended: true }));\r\n \r\n+// Serve static files from uploads folder\r\n+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));\r\n+\r\n // Routes\r\n app.use('/api/auth', authRoutes);\r\n app.use('/api/categories', categoryRoutes);\r\n app.use('/api/menu', menuRoutes);\r\n"
+                },
+                {
+                    "date": 1776021666148,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,21 +15,20 @@\n \r\n dotenv.config();\r\n connectDB();\r\n \r\n-const app = express(); // ✅ app created first\r\n+const app = express();\r\n const httpServer = createServer(app);\r\n \r\n-// الحصول على __dirname في ES modules\r\n const __filename = fileURLToPath(import.meta.url);\r\n const __dirname = path.dirname(__filename);\r\n \r\n // Middleware\r\n app.use(cors());\r\n app.use(express.json());\r\n app.use(express.urlencoded({ extended: true }));\r\n \r\n-// Serve static files from uploads folder\r\n+// Static files - مسار الصور\r\n app.use('/uploads', express.static(path.join(__dirname, 'uploads')));\r\n \r\n // Routes\r\n app.use('/api/auth', authRoutes);\r\n"
+                },
+                {
+                    "date": 1776060920743,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -11,9 +11,9 @@\n import orderRoutes from './routes/orderRoutes.js';\r\n import userRoutes from './routes/userRoutes.js';\r\n import { errorHandler } from './middleware/errorMiddleware.js';\r\n import { initSocket } from './socket/index.js';\r\n-\r\n+import driverRoutes from './routes/driverRoutes.js';\r\n dotenv.config();\r\n connectDB();\r\n \r\n const app = express();\r\n"
+                },
+                {
+                    "date": 1776060932370,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -35,8 +35,9 @@\n app.use('/api/categories', categoryRoutes);\r\n app.use('/api/menu', menuRoutes);\r\n app.use('/api/users', userRoutes);\r\n \r\n+\r\n // Socket.IO\r\n const io = initSocket(httpServer);\r\n app.set('io', io);\r\n app.use('/api/orders', orderRoutes(io));\r\n"
+                }
+            ],
+            "date": 1776008993175,
+            "name": "Commit-0",
+            "content": "import express from 'express';\r\nimport dotenv from 'dotenv';\r\nimport cors from 'cors';\r\nimport { createServer } from 'http';\r\nimport connectDB from './config/db.js';\r\nimport authRoutes from './routes/authRoutes.js';\r\nimport categoryRoutes from './routes/categoryRoutes.js';\r\nimport menuRoutes from './routes/menuRoutes.js';\r\nimport orderRoutes from './routes/orderRoutes.js';\r\nimport userRoutes from './routes/userRoutes.js';\r\nimport { errorHandler } from './middleware/errorMiddleware.js';\r\nimport { initSocket } from './socket/index.js';\r\n\r\ndotenv.config();\r\nconnectDB();\r\n\r\nconst app = express();\r\nconst httpServer = createServer(app);\r\n\r\n// Middleware\r\napp.use(cors());\r\napp.use(express.json());\r\napp.use(express.urlencoded({ extended: true }));\r\n\r\n// Routes\r\napp.use('/api/auth', authRoutes);\r\napp.use('/api/categories', categoryRoutes);\r\napp.use('/api/menu', menuRoutes);\r\napp.use('/api/users', userRoutes);\r\n\r\n// Socket.IO\r\nconst io = initSocket(httpServer);\r\napp.set('io', io);\r\napp.use('/api/orders', orderRoutes(io));\r\n\r\n// Error Handler\r\napp.use(errorHandler);\r\n\r\nconst PORT = process.env.PORT || 5000;\r\nhttpServer.listen(PORT, () => {\r\n  console.log(`Server running on port ${PORT}`);\r\n});"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/components/Order/OrderCard.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011621974,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011621974,
+            "name": "Commit-0",
+            "content": "import { Link } from 'react-router-dom';\r\nimport { formatPrice, formatDate, formatOrderId } from '../../utils/formatters';\r\nimport OrderStatusBadge from './OrderStatusBadge';\r\n\r\nconst OrderCard = ({ order }) => {\r\n  return (\r\n    <div className=\"bg-white rounded-lg shadow-md p-6\">\r\n      <div className=\"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4\">\r\n        <div>\r\n          <p className=\"text-sm text-gray-500\">رقم الطلب: {formatOrderId(order._id)}</p>\r\n          <p className=\"text-sm text-gray-500\">{formatDate(order.createdAt)}</p>\r\n        </div>\r\n        <OrderStatusBadge status={order.status} />\r\n      </div>\r\n      \r\n      <div className=\"border-t pt-4\">\r\n        <p className=\"font-medium mb-2\">العناصر:</p>\r\n        <ul className=\"space-y-2\">\r\n          {order.items.slice(0, 3).map((item, idx) => (\r\n            <li key={idx} className=\"flex justify-between text-sm\">\r\n              <span>{item.quantity} × {item.name}</span>\r\n              <span>{formatPrice(item.price * item.quantity)}</span>\r\n            </li>\r\n          ))}\r\n          {order.items.length > 3 && (\r\n            <li className=\"text-sm text-gray-500\">+ {order.items.length - 3} عناصر أخرى</li>\r\n          )}\r\n        </ul>\r\n      </div>\r\n      \r\n      <div className=\"border-t mt-4 pt-4 flex justify-between items-center\">\r\n        <span className=\"font-bold\">الإجمالي: {formatPrice(order.totalPrice)}</span>\r\n        <Link\r\n          to={`/tracking/${order._id}`}\r\n          className=\"text-primary-600 hover:text-primary-700 font-medium\"\r\n        >\r\n          تتبع الطلب ←\r\n        </Link>\r\n      </div>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default OrderCard;"
+        }
+    ]
+}

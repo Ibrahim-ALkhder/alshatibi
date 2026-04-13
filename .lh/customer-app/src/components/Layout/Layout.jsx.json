@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/components/Layout/Layout.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011507217,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011507217,
+            "name": "Commit-0",
+            "content": "import { Outlet } from 'react-router-dom';\r\nimport Navbar from './Navbar';\r\nimport Footer from './Footer';\r\n\r\nconst Layout = () => {\r\n  return (\r\n    <div className=\"min-h-screen flex flex-col\">\r\n      <Navbar />\r\n      <main className=\"flex-grow container mx-auto px-4 py-6\">\r\n        <Outlet />\r\n      </main>\r\n      <Footer />\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default Layout;"
+        }
+    ]
+}

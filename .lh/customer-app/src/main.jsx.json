@@ -1,0 +1,22 @@
+{
+    "sourceFile": "customer-app/src/main.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776010621335,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776011430709,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,19 +1,19 @@\n-import React from 'react'\n-import ReactDOM from 'react-dom/client'\n-import App from './App.jsx'\n-import './index.css'\n-import { AuthProvider } from './context/AuthContext.jsx'\n-import { CartProvider } from './context/CartContext.jsx'\n-import { SocketProvider } from './context/SocketContext.jsx'\n-\n-ReactDOM.createRoot(document.getElementById('root')).render(\n-  <React.StrictMode>\n-    <AuthProvider>\n-      <CartProvider>\n-        <SocketProvider>\n-          <App />\n-        </SocketProvider>\n-      </CartProvider>\n-    </AuthProvider>\n-  </React.StrictMode>,\n+import React from 'react'\r\n+import ReactDOM from 'react-dom/client'\r\n+import App from './App.jsx'\r\n+import './index.css'\r\n+import { AuthProvider } from './context/AuthContext.jsx'\r\n+import { CartProvider } from './context/CartContext.jsx'\r\n+import { SocketProvider } from './context/SocketContext.jsx'\r\n+\r\n+ReactDOM.createRoot(document.getElementById('root')).render(\r\n+  <React.StrictMode>\r\n+    <AuthProvider>\r\n+      <CartProvider>\r\n+        <SocketProvider>\r\n+          <App />\r\n+        </SocketProvider>\r\n+      </CartProvider>\r\n+    </AuthProvider>\r\n+  </React.StrictMode>,\r\n )\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776010621335,
+            "name": "Commit-0",
+            "content": "import React from 'react'\nimport ReactDOM from 'react-dom/client'\nimport App from './App.jsx'\nimport './index.css'\nimport { AuthProvider } from './context/AuthContext.jsx'\nimport { CartProvider } from './context/CartContext.jsx'\nimport { SocketProvider } from './context/SocketContext.jsx'\n\nReactDOM.createRoot(document.getElementById('root')).render(\n  <React.StrictMode>\n    <AuthProvider>\n      <CartProvider>\n        <SocketProvider>\n          <App />\n        </SocketProvider>\n      </CartProvider>\n    </AuthProvider>\n  </React.StrictMode>,\n)"
+        }
+    ]
+}

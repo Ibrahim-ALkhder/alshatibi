@@ -1,0 +1,30 @@
+{
+    "sourceFile": "backend/models/User.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 3,
+            "patches": [
+                {
+                    "date": 1776014041519,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776014071215,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,8 +6,9 @@\n     name: { type: String, required: true },\r\n     email: { type: String, required: true, unique: true },\r\n     password: { type: String, required: true },\r\n     phone: { type: String, required: true },\r\n+\r\n     address: {\r\n       street: String,\r\n       city: String,\r\n       area: String,\r\n@@ -15,21 +16,31 @@\n       floor: String,\r\n       apartment: String,\r\n       notes: String,\r\n     },\r\n-    role: { type: String, enum: ['customer', 'admin'], default: 'customer' },\r\n+\r\n+    role: {\r\n+      type: String,\r\n+      enum: ['customer', 'admin', 'staff'],\r\n+      default: 'customer',\r\n+    },\r\n   },\r\n   { timestamps: true }\r\n );\r\n \r\n+// hash password before save\r\n userSchema.pre('save', async function (next) {\r\n   if (!this.isModified('password')) return next();\r\n+\r\n   const salt = await bcrypt.genSalt(10);\r\n   this.password = await bcrypt.hash(this.password, salt);\r\n+\r\n+  next();\r\n });\r\n \r\n+// compare password\r\n userSchema.methods.matchPassword = async function (enteredPassword) {\r\n   return await bcrypt.compare(enteredPassword, this.password);\r\n };\r\n-role: { type: String, enum: ['customer', 'admin', 'staff'], default: 'customer' },\r\n+\r\n const User = mongoose.model('User', userSchema);\r\n export default User;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776014909861,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,9 +6,8 @@\n     name: { type: String, required: true },\r\n     email: { type: String, required: true, unique: true },\r\n     password: { type: String, required: true },\r\n     phone: { type: String, required: true },\r\n-\r\n     address: {\r\n       street: String,\r\n       city: String,\r\n       area: String,\r\n@@ -16,29 +15,23 @@\n       floor: String,\r\n       apartment: String,\r\n       notes: String,\r\n     },\r\n-\r\n-    role: {\r\n-      type: String,\r\n-      enum: ['customer', 'admin', 'staff'],\r\n-      default: 'customer',\r\n-    },\r\n+    role: { type: String, enum: ['customer', 'admin', 'staff'], default: 'customer' },\r\n   },\r\n   { timestamps: true }\r\n );\r\n \r\n-// hash password before save\r\n-userSchema.pre('save', async function (next) {\r\n-  if (!this.isModified('password')) return next();\r\n-\r\n+// تشفير كلمة المرور قبل الحفظ\r\n+userSchema.pre('save', async function () {\r\n+  if (!this.isModified('password')) {\r\n+    return;\r\n+  }\r\n   const salt = await bcrypt.genSalt(10);\r\n   this.password = await bcrypt.hash(this.password, salt);\r\n-\r\n-  next();\r\n });\r\n \r\n-// compare password\r\n+// مقارنة كلمة المرور المدخلة مع المخزنة\r\n userSchema.methods.matchPassword = async function (enteredPassword) {\r\n   return await bcrypt.compare(enteredPassword, this.password);\r\n };\r\n \r\n"
+                },
+                {
+                    "date": 1776061704318,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,9 +15,9 @@\n       floor: String,\r\n       apartment: String,\r\n       notes: String,\r\n     },\r\n-    role: { type: String, enum: ['customer', 'admin', 'staff'], default: 'customer' },\r\n+    role: { type: String, enum: ['customer', 'admin', 'staff', 'driver'], default: 'customer' },\r\n   },\r\n   { timestamps: true }\r\n );\r\n \r\n"
+                }
+            ],
+            "date": 1776014041519,
+            "name": "Commit-0",
+            "content": "import mongoose from 'mongoose';\r\nimport bcrypt from 'bcryptjs';\r\n\r\nconst userSchema = mongoose.Schema(\r\n  {\r\n    name: { type: String, required: true },\r\n    email: { type: String, required: true, unique: true },\r\n    password: { type: String, required: true },\r\n    phone: { type: String, required: true },\r\n    address: {\r\n      street: String,\r\n      city: String,\r\n      area: String,\r\n      building: String,\r\n      floor: String,\r\n      apartment: String,\r\n      notes: String,\r\n    },\r\n    role: { type: String, enum: ['customer', 'admin'], default: 'customer' },\r\n  },\r\n  { timestamps: true }\r\n);\r\n\r\nuserSchema.pre('save', async function (next) {\r\n  if (!this.isModified('password')) return next();\r\n  const salt = await bcrypt.genSalt(10);\r\n  this.password = await bcrypt.hash(this.password, salt);\r\n});\r\n\r\nuserSchema.methods.matchPassword = async function (enteredPassword) {\r\n  return await bcrypt.compare(enteredPassword, this.password);\r\n};\r\nrole: { type: String, enum: ['customer', 'admin', 'staff'], default: 'customer' },\r\nconst User = mongoose.model('User', userSchema);\r\nexport default User;"
+        }
+    ]
+}

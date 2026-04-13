@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/routes/menuRoutes.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776008961237,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776013532931,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,17 +6,18 @@\n   updateMenuItem,\r\n   deleteMenuItem,\r\n } from '../controllers/menuController.js';\r\n import { protect, admin } from '../middleware/authMiddleware.js';\r\n+import upload from '../middleware/uploadMiddleware.js';\r\n \r\n const router = express.Router();\r\n \r\n router.route('/')\r\n   .get(getMenuItems)\r\n-  .post(protect, admin, createMenuItem);\r\n+  .post(protect, admin, upload.single('image'), createMenuItem);\r\n \r\n router.route('/:id')\r\n   .get(getMenuItemById)\r\n-  .put(protect, admin, updateMenuItem)\r\n+  .put(protect, admin, upload.single('image'), updateMenuItem)\r\n   .delete(protect, admin, deleteMenuItem);\r\n \r\n export default router;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776008961237,
+            "name": "Commit-0",
+            "content": "import express from 'express';\r\nimport {\r\n  getMenuItems,\r\n  getMenuItemById,\r\n  createMenuItem,\r\n  updateMenuItem,\r\n  deleteMenuItem,\r\n} from '../controllers/menuController.js';\r\nimport { protect, admin } from '../middleware/authMiddleware.js';\r\n\r\nconst router = express.Router();\r\n\r\nrouter.route('/')\r\n  .get(getMenuItems)\r\n  .post(protect, admin, createMenuItem);\r\n\r\nrouter.route('/:id')\r\n  .get(getMenuItemById)\r\n  .put(protect, admin, updateMenuItem)\r\n  .delete(protect, admin, deleteMenuItem);\r\n\r\nexport default router;"
+        }
+    ]
+}

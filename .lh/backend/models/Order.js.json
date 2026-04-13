@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/models/Order.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776026828150,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776060803891,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -31,8 +31,11 @@\n     paymentMethod: { type: String, enum: ['cash', 'card'], default: 'cash' },\r\n     isPaid: { type: Boolean, default: false },\r\n     paidAt: Date,\r\n     deliveredAt: Date,\r\n+    // ---------- حقول جديدة للمندوب ----------\r\n+    driver: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryDriver', default: null },\r\n+    deliveryFee: { type: Number, default: 20 },\r\n   },\r\n   { timestamps: true }\r\n );\r\n \r\n"
+                }
+            ],
+            "date": 1776026828150,
+            "name": "Commit-0",
+            "content": "import mongoose from 'mongoose';\r\n\r\nconst orderSchema = mongoose.Schema(\r\n  {\r\n    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },\r\n    items: [\r\n      {\r\n        menuItem: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },\r\n        name: String,\r\n        quantity: { type: Number, required: true },\r\n        price: { type: Number, required: true },\r\n        options: [{ name: String, choice: String, price: Number }],\r\n      },\r\n    ],\r\n    totalPrice: { type: Number, required: true },\r\n    deliveryAddress: {\r\n      street: String,\r\n      city: String,\r\n      area: String,\r\n      building: String,\r\n      floor: String,\r\n      apartment: String,\r\n      notes: String,\r\n    },\r\n    phone: { type: String, required: true },\r\n    status: {\r\n      type: String,\r\n      enum: ['Preparing', 'Ready', 'Out for delivery', 'Delivered'],\r\n      default: 'Preparing',\r\n    },\r\n    paymentMethod: { type: String, enum: ['cash', 'card'], default: 'cash' },\r\n    isPaid: { type: Boolean, default: false },\r\n    paidAt: Date,\r\n    deliveredAt: Date,\r\n  },\r\n  { timestamps: true }\r\n);\r\n\r\nconst Order = mongoose.model('Order', orderSchema);\r\nexport default Order;"
+        }
+    ]
+}

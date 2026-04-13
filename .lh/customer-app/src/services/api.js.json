@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/services/api.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776010439794,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776010439794,
+            "name": "Commit-0",
+            "content": "import axios from 'axios';\r\n\r\nconst api = axios.create({\r\n  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',\r\n});\r\n\r\napi.interceptors.request.use(\r\n  (config) => {\r\n    const token = localStorage.getItem('token');\r\n    if (token) {\r\n      config.headers.Authorization = `Bearer ${token}`;\r\n    }\r\n    return config;\r\n  },\r\n  (error) => Promise.reject(error)\r\n);\r\n\r\napi.interceptors.response.use(\r\n  (response) => response,\r\n  (error) => {\r\n    if (error.response?.status === 401) {\r\n      localStorage.removeItem('token');\r\n      window.location.href = '/login';\r\n    }\r\n    return Promise.reject(error);\r\n  }\r\n);\r\n\r\nexport default api;"
+        }
+    ]
+}

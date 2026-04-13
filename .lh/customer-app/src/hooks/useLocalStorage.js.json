@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/hooks/useLocalStorage.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011474361,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011474361,
+            "name": "Commit-0",
+            "content": "import { useState, useEffect } from 'react';\r\n\r\nconst useLocalStorage = (key, initialValue) => {\r\n  const [storedValue, setStoredValue] = useState(() => {\r\n    try {\r\n      const item = window.localStorage.getItem(key);\r\n      return item ? JSON.parse(item) : initialValue;\r\n    } catch (error) {\r\n      console.error(error);\r\n      return initialValue;\r\n    }\r\n  });\r\n\r\n  const setValue = (value) => {\r\n    try {\r\n      const valueToStore = value instanceof Function ? value(storedValue) : value;\r\n      setStoredValue(valueToStore);\r\n      window.localStorage.setItem(key, JSON.stringify(valueToStore));\r\n    } catch (error) {\r\n      console.error(error);\r\n    }\r\n  };\r\n\r\n  return [storedValue, setValue];\r\n};\r\n\r\nexport default useLocalStorage;"
+        }
+    ]
+}

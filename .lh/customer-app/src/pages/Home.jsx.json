@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/pages/Home.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011670925,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011670925,
+            "name": "Commit-0",
+            "content": "import { Link } from 'react-router-dom';\r\nimport { useAuth } from '../context/AuthContext';\r\n\r\nconst Home = () => {\r\n  const { user } = useAuth();\r\n\r\n  return (\r\n    <div className=\"text-center py-8 md:py-16\">\r\n      <h1 className=\"text-4xl md:text-5xl font-bold text-primary-600 mb-4\">\r\n        مرحباً {user?.name} في الشطبي\r\n      </h1>\r\n      <p className=\"text-xl text-gray-600 mb-8\">\r\n        أشهى المأكولات السودانية في قلب القاهرة\r\n      </p>\r\n      \r\n      <div className=\"grid md:grid-cols-2 gap-6 max-w-4xl mx-auto\">\r\n        <Link to=\"/menu\" className=\"bg-primary-600 hover:bg-primary-700 text-white p-6 rounded-lg shadow-lg transition\">\r\n          <h2 className=\"text-2xl font-bold mb-2\">تصفح القائمة</h2>\r\n          <p>اكتشف تشكيلة واسعة من الأطباق السودانية الأصيلة</p>\r\n        </Link>\r\n        <Link to=\"/orders\" className=\"bg-gray-800 hover:bg-gray-900 text-white p-6 rounded-lg shadow-lg transition\">\r\n          <h2 className=\"text-2xl font-bold mb-2\">طلباتي</h2>\r\n          <p>تابع طلباتك السابقة والحالية</p>\r\n        </Link>\r\n      </div>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default Home;"
+        }
+    ]
+}

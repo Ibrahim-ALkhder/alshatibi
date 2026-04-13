@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/components/Layout/Footer.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011516038,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011516038,
+            "name": "Commit-0",
+            "content": "const Footer = () => {\r\n  return (\r\n    <footer className=\"bg-gray-800 text-white py-6 mt-auto\">\r\n      <div className=\"container mx-auto px-4 text-center\">\r\n        <p className=\"text-sm\">\r\n          &copy; {new Date().getFullYear()} الشطبي. جميع الحقوق محفوظة.\r\n        </p>\r\n      </div>\r\n    </footer>\r\n  );\r\n};\r\n\r\nexport default Footer;"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/.gitignore",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011417358,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011417358,
+            "name": "Commit-0",
+            "content": "# Logs\r\nlogs\r\n*.log\r\nnpm-debug.log*\r\nyarn-debug.log*\r\nyarn-error.log*\r\npnpm-debug.log*\r\nlerna-debug.log*\r\n\r\nnode_modules\r\ndist\r\ndist-ssr\r\n*.local\r\n\r\n# Editor directories and files\r\n.vscode/*\r\n!.vscode/extensions.json\r\n.idea\r\n.DS_Store\r\n*.suo\r\n*.ntvs*\r\n*.njsproj\r\n*.sln\r\n*.sw?"
+        }
+    ]
+}

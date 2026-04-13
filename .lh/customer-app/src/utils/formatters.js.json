@@ -1,0 +1,22 @@
+{
+    "sourceFile": "customer-app/src/utils/formatters.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776011494494,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776021697636,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -16,5 +16,13 @@\n };\r\n \r\n export const formatOrderId = (id) => {\r\n   return `#${id.slice(-6).toUpperCase()}`;\r\n+};\r\n+\r\n+// دالة مساعدة للحصول على رابط الصورة الكامل\r\n+export const getImageUrl = (imagePath) => {\r\n+  if (!imagePath) return 'https://via.placeholder.com/300?text=الشطبي';\r\n+  if (imagePath.startsWith('http')) return imagePath;\r\n+  const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';\r\n+  return `${baseURL}${imagePath}`;\r\n };\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776011494494,
+            "name": "Commit-0",
+            "content": "export const formatPrice = (price) => {\r\n  return new Intl.NumberFormat('ar-EG', {\r\n    style: 'currency',\r\n    currency: 'EGP',\r\n  }).format(price);\r\n};\r\n\r\nexport const formatDate = (date) => {\r\n  return new Intl.DateTimeFormat('ar-EG', {\r\n    year: 'numeric',\r\n    month: 'long',\r\n    day: 'numeric',\r\n    hour: 'numeric',\r\n    minute: 'numeric',\r\n  }).format(new Date(date));\r\n};\r\n\r\nexport const formatOrderId = (id) => {\r\n  return `#${id.slice(-6).toUpperCase()}`;\r\n};"
+        }
+    ]
+}

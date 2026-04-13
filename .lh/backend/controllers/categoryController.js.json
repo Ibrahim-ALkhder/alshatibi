@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/controllers/categoryController.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776008646413,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776008646413,
+            "name": "Commit-0",
+            "content": "import Category from '../models/Category.js';\r\n\r\n// @desc    Get all categories\r\n// @route   GET /api/categories\r\nexport const getCategories = async (req, res) => {\r\n  try {\r\n    const categories = await Category.find({}).sort('order');\r\n    res.json(categories);\r\n  } catch (error) {\r\n    res.status(500).json({ message: error.message });\r\n  }\r\n};\r\n\r\n// @desc    Create a category (admin)\r\n// @route   POST /api/categories\r\nexport const createCategory = async (req, res) => {\r\n  try {\r\n    const category = new Category(req.body);\r\n    const created = await category.save();\r\n    res.status(201).json(created);\r\n  } catch (error) {\r\n    res.status(400).json({ message: error.message });\r\n  }\r\n};\r\n\r\n// @desc    Update a category (admin)\r\n// @route   PUT /api/categories/:id\r\nexport const updateCategory = async (req, res) => {\r\n  try {\r\n    const category = await Category.findById(req.params.id);\r\n    if (category) {\r\n      Object.assign(category, req.body);\r\n      const updated = await category.save();\r\n      res.json(updated);\r\n    } else {\r\n      res.status(404).json({ message: 'Category not found' });\r\n    }\r\n  } catch (error) {\r\n    res.status(400).json({ message: error.message });\r\n  }\r\n};\r\n\r\n// @desc    Delete a category (admin)\r\n// @route   DELETE /api/categories/:id\r\nexport const deleteCategory = async (req, res) => {\r\n  try {\r\n    const category = await Category.findById(req.params.id);\r\n    if (category) {\r\n      await category.deleteOne();\r\n      res.json({ message: 'Category removed' });\r\n    } else {\r\n      res.status(404).json({ message: 'Category not found' });\r\n    }\r\n  } catch (error) {\r\n    res.status(500).json({ message: error.message });\r\n  }\r\n};"
+        }
+    ]
+}

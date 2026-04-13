@@ -1,0 +1,30 @@
+{
+    "sourceFile": "backend/routes/userRoutes.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 3,
+            "patches": [
+                {
+                    "date": 1776008984126,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776025332365,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,8 +1,8 @@\n import express from 'express';\r\n import {\r\n   getUsers,\r\n-  getUserById,\r\n+  createUser,\r\n   updateUser,\r\n   deleteUser,\r\n   getUserStats,\r\n } from '../controllers/userController.js';\r\n@@ -12,9 +12,9 @@\n \r\n router.use(protect);\r\n router.use(admin);\r\n \r\n-router.route('/').get(getUsers);\r\n+router.route('/').get(getUsers).post(createUser);\r\n router.route('/stats').get(getUserStats);\r\n-router.route('/:id').get(getUserById).put(updateUser).delete(deleteUser);\r\n+router.route('/:id').put(updateUser).delete(deleteUser);\r\n \r\n export default router;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776060989850,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -6,8 +6,9 @@\n   deleteUser,\r\n   getUserStats,\r\n } from '../controllers/userController.js';\r\n import { protect, admin } from '../middleware/authMiddleware.js';\r\n+import { createDriver, getDrivers } from '../controllers/userController.js';\r\n \r\n const router = express.Router();\r\n \r\n router.use(protect);\r\n"
+                },
+                {
+                    "date": 1776060995631,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -12,9 +12,9 @@\n const router = express.Router();\r\n \r\n router.use(protect);\r\n router.use(admin);\r\n-\r\n+router.route('/drivers').post(createDriver).get(getDrivers);\r\n router.route('/').get(getUsers).post(createUser);\r\n router.route('/stats').get(getUserStats);\r\n router.route('/:id').put(updateUser).delete(deleteUser);\r\n \r\n"
+                }
+            ],
+            "date": 1776008984126,
+            "name": "Commit-0",
+            "content": "import express from 'express';\r\nimport {\r\n  getUsers,\r\n  getUserById,\r\n  updateUser,\r\n  deleteUser,\r\n  getUserStats,\r\n} from '../controllers/userController.js';\r\nimport { protect, admin } from '../middleware/authMiddleware.js';\r\n\r\nconst router = express.Router();\r\n\r\nrouter.use(protect);\r\nrouter.use(admin);\r\n\r\nrouter.route('/').get(getUsers);\r\nrouter.route('/stats').get(getUserStats);\r\nrouter.route('/:id').get(getUserById).put(updateUser).delete(deleteUser);\r\n\r\nexport default router;"
+        }
+    ]
+}

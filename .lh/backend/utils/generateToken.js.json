@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/utils/generateToken.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776008900527,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776008900526,
+            "name": "Commit-0",
+            "content": "import jwt from 'jsonwebtoken';\r\n\r\nconst generateToken = (id) => {\r\n  return jwt.sign({ id }, process.env.JWT_SECRET, {\r\n    expiresIn: '30d',\r\n  });\r\n};\r\n\r\nexport default generateToken;"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/components/UI/Button.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011530913,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011530913,
+            "name": "Commit-0",
+            "content": "const Button = ({ children, variant = 'primary', className = '', ...props }) => {\r\n  const baseClasses = 'font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';\r\n  const variants = {\r\n    primary: 'bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500',\r\n    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500',\r\n    danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500',\r\n  };\r\n\r\n  return (\r\n    <button\r\n      className={`${baseClasses} ${variants[variant]} ${className}`}\r\n      {...props}\r\n    >\r\n      {children}\r\n    </button>\r\n  );\r\n};\r\n\r\nexport default Button;"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/components/UI/Loader.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011525585,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011525585,
+            "name": "Commit-0",
+            "content": "const Loader = ({ fullScreen = false }) => {\r\n  const spinner = (\r\n    <div className=\"flex justify-center items-center\">\r\n      <div className=\"animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600\"></div>\r\n    </div>\r\n  );\r\n\r\n  if (fullScreen) {\r\n    return (\r\n      <div className=\"fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50\">\r\n        {spinner}\r\n      </div>\r\n    );\r\n  }\r\n\r\n  return spinner;\r\n};\r\n\r\nexport default Loader;"
+        }
+    ]
+}

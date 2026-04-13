@@ -1,0 +1,26 @@
+{
+    "sourceFile": "backend/middleware/uploadMiddleware.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1776013471957,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776020417981,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -2,9 +2,9 @@\n import path from 'path';\r\n \r\n const storage = multer.diskStorage({\r\n   destination: function (req, file, cb) {\r\n-    cb(null, 'uploads/');\r\n+    cb(null, 'uploads/'); // تأكد من وجود هذا المجلد\r\n   },\r\n   filename: function (req, file, cb) {\r\n     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);\r\n     const ext = path.extname(file.originalname);\r\n@@ -24,9 +24,9 @@\n };\r\n \r\n const upload = multer({\r\n   storage: storage,\r\n-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB\r\n+  limits: { fileSize: 5 * 1024 * 1024 },\r\n   fileFilter: fileFilter\r\n });\r\n \r\n export default upload;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776021617354,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,10 +1,17 @@\n import multer from 'multer';\r\n import path from 'path';\r\n+import fs from 'fs';\r\n \r\n+// تأكد من وجود مجلد uploads\r\n+const uploadDir = 'uploads';\r\n+if (!fs.existsSync(uploadDir)) {\r\n+  fs.mkdirSync(uploadDir, { recursive: true });\r\n+}\r\n+\r\n const storage = multer.diskStorage({\r\n   destination: function (req, file, cb) {\r\n-    cb(null, 'uploads/'); // تأكد من وجود هذا المجلد\r\n+    cb(null, uploadDir);\r\n   },\r\n   filename: function (req, file, cb) {\r\n     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);\r\n     const ext = path.extname(file.originalname);\r\n@@ -16,17 +23,17 @@\n   const allowedTypes = /jpeg|jpg|png|gif|webp/;\r\n   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());\r\n   const mimetype = allowedTypes.test(file.mimetype);\r\n   if (mimetype && extname) {\r\n-    return cb(null, true);\r\n+    cb(null, true);\r\n   } else {\r\n     cb(new Error('Only image files are allowed'));\r\n   }\r\n };\r\n \r\n const upload = multer({\r\n   storage: storage,\r\n-  limits: { fileSize: 5 * 1024 * 1024 },\r\n+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB\r\n   fileFilter: fileFilter\r\n });\r\n \r\n export default upload;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776013471957,
+            "name": "Commit-0",
+            "content": "import multer from 'multer';\r\nimport path from 'path';\r\n\r\nconst storage = multer.diskStorage({\r\n  destination: function (req, file, cb) {\r\n    cb(null, 'uploads/');\r\n  },\r\n  filename: function (req, file, cb) {\r\n    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);\r\n    const ext = path.extname(file.originalname);\r\n    cb(null, file.fieldname + '-' + uniqueSuffix + ext);\r\n  }\r\n});\r\n\r\nconst fileFilter = (req, file, cb) => {\r\n  const allowedTypes = /jpeg|jpg|png|gif|webp/;\r\n  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());\r\n  const mimetype = allowedTypes.test(file.mimetype);\r\n  if (mimetype && extname) {\r\n    return cb(null, true);\r\n  } else {\r\n    cb(new Error('Only image files are allowed'));\r\n  }\r\n};\r\n\r\nconst upload = multer({\r\n  storage: storage,\r\n  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB\r\n  fileFilter: fileFilter\r\n});\r\n\r\nexport default upload;"
+        }
+    ]
+}

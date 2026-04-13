@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/package.json",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011372883,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011372883,
+            "name": "Commit-0",
+            "content": "{\r\n  \"name\": \"customer-app\",\r\n  \"private\": true,\r\n  \"version\": \"0.0.0\",\r\n  \"type\": \"module\",\r\n  \"scripts\": {\r\n    \"dev\": \"vite\",\r\n    \"build\": \"vite build\",\r\n    \"preview\": \"vite preview\"\r\n  },\r\n  \"dependencies\": {\r\n    \"axios\": \"^1.6.7\",\r\n    \"react\": \"^18.2.0\",\r\n    \"react-dom\": \"^18.2.0\",\r\n    \"react-router-dom\": \"^6.22.0\",\r\n    \"socket.io-client\": \"^4.7.4\"\r\n  },\r\n  \"devDependencies\": {\r\n    \"@types/react\": \"^18.2.55\",\r\n    \"@types/react-dom\": \"^18.2.19\",\r\n    \"@vitejs/plugin-react\": \"^4.2.1\",\r\n    \"autoprefixer\": \"^10.4.17\",\r\n    \"eslint\": \"^8.56.0\",\r\n    \"eslint-plugin-react\": \"^7.33.2\",\r\n    \"eslint-plugin-react-hooks\": \"^4.6.0\",\r\n    \"eslint-plugin-react-refresh\": \"^0.4.5\",\r\n    \"postcss\": \"^8.4.35\",\r\n    \"tailwindcss\": \"^3.4.1\",\r\n    \"vite\": \"^5.1.0\"\r\n  }\r\n}"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/components/Cart/CartItem.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011612416,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011612416,
+            "name": "Commit-0",
+            "content": "import { Link } from 'react-router-dom';\r\nimport { formatPrice } from '../../utils/formatters';\r\nimport { TrashIcon, PlusIcon, MinusIcon } from '../UI/Icons';\r\n\r\nconst CartItem = ({ item, index, onUpdateQuantity, onRemove }) => {\r\n  const subtotal = item.price * item.quantity;\r\n\r\n  return (\r\n    <div className=\"flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 border-b\">\r\n      <div className=\"flex items-center space-x-4 space-x-reverse\">\r\n        <img\r\n          src={item.image || 'https://via.placeholder.com/80?text=الشطبي'}\r\n          alt={item.name}\r\n          className=\"w-20 h-20 object-cover rounded\"\r\n        />\r\n        <div>\r\n          <Link to={`/menu/${item.menuItem}`} className=\"font-medium text-gray-800 hover:text-primary-600\">\r\n            {item.name}\r\n          </Link>\r\n          {item.options && item.options.length > 0 && (\r\n            <div className=\"text-sm text-gray-500 mt-1\">\r\n              {item.options.map(opt => `${opt.name}: ${opt.choice}`).join('، ')}\r\n            </div>\r\n          )}\r\n          <p className=\"text-primary-600 font-bold mt-1\">{formatPrice(item.price)}</p>\r\n        </div>\r\n      </div>\r\n\r\n      <div className=\"flex items-center space-x-4 space-x-reverse mt-4 sm:mt-0\">\r\n        <div className=\"flex items-center border rounded-lg\">\r\n          <button\r\n            onClick={() => onUpdateQuantity(index, item.quantity - 1)}\r\n            className=\"p-2 hover:bg-gray-100\"\r\n            disabled={item.quantity <= 1}\r\n          >\r\n            <MinusIcon className=\"w-4 h-4\" />\r\n          </button>\r\n          <span className=\"px-4 py-2 font-medium\">{item.quantity}</span>\r\n          <button\r\n            onClick={() => onUpdateQuantity(index, item.quantity + 1)}\r\n            className=\"p-2 hover:bg-gray-100\"\r\n          >\r\n            <PlusIcon className=\"w-4 h-4\" />\r\n          </button>\r\n        </div>\r\n        <p className=\"font-bold text-gray-800 w-24 text-center\">{formatPrice(subtotal)}</p>\r\n        <button\r\n          onClick={() => onRemove(index)}\r\n          className=\"text-red-500 hover:text-red-700 p-2\"\r\n        >\r\n          <TrashIcon className=\"w-5 h-5\" />\r\n        </button>\r\n      </div>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default CartItem;"
+        }
+    ]
+}

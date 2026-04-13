@@ -1,0 +1,18 @@
+{
+    "sourceFile": "admin-dashboard/customer-app/src/context/AuthContext.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776061354999,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776061354999,
+            "name": "Commit-0",
+            "content": "import { createContext, useState, useEffect, useContext } from 'react';\r\nimport api from '../services/api';\r\n\r\nconst AuthContext = createContext();\r\n\r\nexport const AuthProvider = ({ children }) => {\r\n  const [user, setUser] = useState(null);\r\n  const [loading, setLoading] = useState(true);\r\n\r\n  useEffect(() => {\r\n    const token = localStorage.getItem('token');\r\n    if (token) {\r\n      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;\r\n      fetchProfile();\r\n    } else {\r\n      setLoading(false);\r\n    }\r\n  }, []);\r\n\r\n  const fetchProfile = async () => {\r\n    try {\r\n      const { data } = await api.get('/auth/profile');\r\n      setUser(data);\r\n    } catch (error) {\r\n      console.error('Failed to fetch profile:', error);\r\n      localStorage.removeItem('token');\r\n      delete api.defaults.headers.common['Authorization'];\r\n    } finally {\r\n      setLoading(false);\r\n    }\r\n  };\r\n\r\n  const login = async (email, password) => {\r\n    const { data } = await api.post('/auth/login', { email, password });\r\n    localStorage.setItem('token', data.token);\r\n    api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;\r\n    setUser(data);\r\n    return data;\r\n  };\r\n\r\n  const register = async (userData) => {\r\n    const { data } = await api.post('/auth/register', userData);\r\n    localStorage.setItem('token', data.token);\r\n    api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;\r\n    setUser(data);\r\n    return data;\r\n  };\r\n\r\n  const logout = () => {\r\n    localStorage.removeItem('token');\r\n    delete api.defaults.headers.common['Authorization'];\r\n    setUser(null);\r\n  };\r\n\r\n  const updateProfile = async (userData) => {\r\n    const { data } = await api.put('/auth/profile', userData);\r\n    setUser(data);\r\n    return data;\r\n  };\r\n\r\n  return (\r\n    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>\r\n      {children}\r\n    </AuthContext.Provider>\r\n  );\r\n};\r\n\r\n// eslint-disable-next-line react-refresh/only-export-components\r\nexport const useAuth = () => useContext(AuthContext);"
+        }
+    ]
+}

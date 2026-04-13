@@ -1,0 +1,18 @@
+{
+    "sourceFile": "customer-app/src/pages/OrderHistory.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776011734656,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776011734656,
+            "name": "Commit-0",
+            "content": "import { useEffect, useState } from 'react';\r\nimport api from '../services/api';\r\nimport OrderCard from '../components/Order/OrderCard';\r\nimport Loader from '../components/UI/Loader';\r\n\r\nconst OrderHistory = () => {\r\n  const [orders, setOrders] = useState([]);\r\n  const [loading, setLoading] = useState(true);\r\n\r\n  useEffect(() => {\r\n    const fetchOrders = async () => {\r\n      try {\r\n        const { data } = await api.get('/orders/myorders');\r\n        setOrders(data);\r\n      } catch (error) {\r\n        console.error('Error fetching orders:', error);\r\n      } finally {\r\n        setLoading(false);\r\n      }\r\n    };\r\n    fetchOrders();\r\n  }, []);\r\n\r\n  if (loading) return <Loader />;\r\n\r\n  return (\r\n    <div>\r\n      <h1 className=\"text-3xl font-bold mb-8\">طلباتي</h1>\r\n      \r\n      {orders.length === 0 ? (\r\n        <div className=\"text-center py-8\">\r\n          <p className=\"text-gray-600\">لا توجد طلبات سابقة</p>\r\n        </div>\r\n      ) : (\r\n        <div className=\"space-y-6\">\r\n          {orders.map(order => (\r\n            <OrderCard key={order._id} order={order} />\r\n          ))}\r\n        </div>\r\n      )}\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default OrderHistory;"
+        }
+    ]
+}

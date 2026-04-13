@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/package.json",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776012019814,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776012029102,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -4,10 +4,10 @@\n   \"description\": \"\",\n   \"main\": \"server.js\",\n   \"scripts\": {\n     \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n-    \"start\": \"node server.js\"\n-    \"dev\": \"nodemon server.js\"\n+    \"start\": \"node server.js\" , \"dev\": \"nodemon server.js\"\n+    \n   },\n   \"keywords\": [],\n   \"author\": \"\",\n   \"license\": \"ISC\",\n"
+                }
+            ],
+            "date": 1776012019814,
+            "name": "Commit-0",
+            "content": "{\n  \"name\": \"backend\",\n  \"version\": \"1.0.0\",\n  \"description\": \"\",\n  \"main\": \"server.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"start\": \"node server.js\"\n    \"dev\": \"nodemon server.js\"\n  },\n  \"keywords\": [],\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"dependencies\": {\n    \"bcryptjs\": \"^3.0.3\",\n    \"cors\": \"^2.8.6\",\n    \"dotenv\": \"^17.4.1\",\n    \"express\": \"^5.2.1\",\n    \"jsonwebtoken\": \"^9.0.3\",\n    \"mongoose\": \"^9.4.1\",\n    \"socket.io\": \"^4.8.3\"\n  },\n  \"devDependencies\": {\n    \"nodemon\": \"^3.1.14\"\n  }\n}\n"
+        }
+    ]
+}

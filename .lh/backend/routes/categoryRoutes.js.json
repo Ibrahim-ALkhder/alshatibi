@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/routes/categoryRoutes.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776008954172,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776008954172,
+            "name": "Commit-0",
+            "content": "import express from 'express';\r\nimport {\r\n  getCategories,\r\n  createCategory,\r\n  updateCategory,\r\n  deleteCategory,\r\n} from '../controllers/categoryController.js';\r\nimport { protect, admin } from '../middleware/authMiddleware.js';\r\n\r\nconst router = express.Router();\r\n\r\nrouter.route('/')\r\n  .get(getCategories)\r\n  .post(protect, admin, createCategory);\r\n\r\nrouter.route('/:id')\r\n  .put(protect, admin, updateCategory)\r\n  .delete(protect, admin, deleteCategory);\r\n\r\nexport default router;"
+        }
+    ]
+}
