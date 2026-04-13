@@ -31,3 +31,9 @@ Thumbs.db
 
 # Testing
 coverage/
+
+# Large binaries
+*.exe
+*.zip
+*.tar
+*.gz
