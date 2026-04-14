@@ -38,6 +38,11 @@ const io = initSocket(httpServer);
 app.set('io', io);
 app.use('/api/orders', orderRoutes(io));
 
+// Health check endpoint for Render
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

@@ -1,4 +1,11 @@
 services:
+  # PostgreSQL Database
+  - type: postgres
+    name: alshatibi-db
+    region: frankfurt
+    plan: free
+    databaseName: alshatibi
+
   # Backend Service
   - type: web
     name: alshatibi-backend
@@ -15,8 +22,10 @@ services:
         value: 10000
       - key: JWT_SECRET
         generateValue: true
-      - key: MONGO_URI
-        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: alshatibi-db
+          property: connectionString
     healthCheckPath: /api/health
     disk:
       name: uploads
@@ -34,7 +43,10 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        sync: false
+        fromService:
+          name: alshatibi-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
     headers:
       - path: /*
         name: Cache-Control
