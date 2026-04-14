@@ -27,16 +27,13 @@ services:
           name: alshatibi-db
           property: connectionString
     healthCheckPath: /api/health
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/uploads
-      sizeGB: 1
+    # ❌ تمت إزالة قسم disk بالكامل
 
   # Frontend Service
   - type: web
     name: alshatibi-frontend
     env: static
-    region: frankfurt
+    # ❌ تمت إزالة region (غير مسموح لـ static)
     plan: free
     rootDir: customer-app
     buildCommand: npm install && npm run build
