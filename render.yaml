@@ -5,7 +5,7 @@ databases:
     databaseName: alshatibi
 
 services:
-  # Backend Service (يبقى كما هو)
+  # الخدمة الخلفية (Node.js)
   - type: web
     name: alshatibi-backend
     env: node
@@ -27,9 +27,10 @@ services:
           property: connectionString
     healthCheckPath: /api/health
 
-  # Frontend Service (نوع static بدون plan)
-  - type: static
+  # الخدمة الأمامية (موقع ثابت)
+  - type: web
     name: alshatibi-frontend
+    env: static
     rootDir: customer-app
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
