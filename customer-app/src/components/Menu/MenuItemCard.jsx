@@ -5,9 +5,22 @@ const MenuItemCard = ({ item, onAddToCart }) => {
   const isAvailable = item.isAvailable && item.stock > 0;
   const imageUrl = getImageUrl(item.image);
 
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCart({
+      menuItem: item.id,
+      name: item.nameAr,
+      price: item.price,
+      quantity: 1,
+      options: [],
+      image: item.image,
+    });
+  };
+
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow ${!isAvailable ? 'opacity-70' : ''}`}>
-      <Link to={`/menu/${item._id}`}>
+      <Link to={`/menu/${item.id}`}>
         <img
           src={imageUrl}
           alt={item.nameAr}
@@ -15,7 +28,7 @@ const MenuItemCard = ({ item, onAddToCart }) => {
         />
       </Link>
       <div className="p-4">
-        <Link to={`/menu/${item._id}`}>
+        <Link to={`/menu/${item.id}`}>
           <h3 className="text-lg font-bold text-gray-800 mb-1">{item.nameAr}</h3>
         </Link>
         <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.descriptionAr}</p>
@@ -29,16 +42,8 @@ const MenuItemCard = ({ item, onAddToCart }) => {
 
           {isAvailable ? (
             <button
-              onClick={() =>
-                onAddToCart({
-                  menuItem: item._id,
-                  name: item.nameAr,
-                  price: item.price,
-                  quantity: 1,
-                  options: [],
-                  image: item.image, 
-                })
-              }
+              type="button"
+              onClick={handleAddToCart}
               className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               أضف للسلة

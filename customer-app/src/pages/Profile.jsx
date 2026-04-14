@@ -36,21 +36,31 @@ const Profile = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-    
-    try {
-      const updateData = { ...formData };
-      if (!updateData.password) delete updateData.password;
-      await updateProfile(updateData);
-      setMessage('تم تحديث الملف الشخصي بنجاح');
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'حدث خطأ أثناء التحديث');
-    } finally {
-      setLoading(false);
-    }
+  e.preventDefault();
+  setLoading(true);
+  setMessage('');
+
+  const updateData = {
+    name: formData.name,
+    email: formData.email,
+    phone: formData.phone,
+    address: formData.address,
   };
+  if (formData.password) {
+    updateData.password = formData.password;
+  }
+
+  try {
+    await updateProfile(updateData);
+    setMessage('تم تحديث الملف الشخصي بنجاح');
+    // اختياري: إعادة تعيين حقل كلمة المرور
+    setFormData(prev => ({ ...prev, password: '' }));
+  } catch (error) {
+    setMessage(error.response?.data?.message || 'حدث خطأ أثناء التحديث');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-2xl mx-auto">

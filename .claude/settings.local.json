@@ -6,7 +6,10 @@
       "Bash(gh repo:*)",
       "Bash(where.exe gh:*)",
       "Read(//c/Program Files/GitHub CLI/**)",
-      "Read(//cygdrive/c/Program Files/**)"
+      "Read(//cygdrive/c/Program Files/**)",
+      "WebFetch(domain:customer-app-8kys.onrender.com)",
+      "Bash(curl -v https://alshatibi-backend.onrender.com/api/auth/login)",
+      "Bash(npm run:*)"
     ]
   }
 }

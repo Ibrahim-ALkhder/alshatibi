@@ -1,43 +1,27 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
+import User from './User.js';
+import DeliveryDriver from './DeliveryDriver.js';
 
-const orderSchema = mongoose.Schema(
-  {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    items: [
-      {
-        menuItem: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },
-        name: String,
-        quantity: { type: Number, required: true },
-        price: { type: Number, required: true },
-        options: [{ name: String, choice: String, price: Number }],
-      },
-    ],
-    totalPrice: { type: Number, required: true },
-    deliveryAddress: {
-      street: String,
-      city: String,
-      area: String,
-      building: String,
-      floor: String,
-      apartment: String,
-      notes: String,
-    },
-    phone: { type: String, required: true },
-    status: {
-      type: String,
-      enum: ['Preparing', 'Ready', 'Out for delivery', 'Delivered'],
-      default: 'Preparing',
-    },
-    paymentMethod: { type: String, enum: ['cash', 'card'], default: 'cash' },
-    isPaid: { type: Boolean, default: false },
-    paidAt: Date,
-    deliveredAt: Date,
-    // ---------- حقول جديدة للمندوب ----------
-    driver: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryDriver', default: null },
-    deliveryFee: { type: Number, default: 20 },
+const Order = sequelize.define('Order', {
+  totalPrice: { type: DataTypes.FLOAT, allowNull: false },
+  phone: { type: DataTypes.STRING, allowNull: false },
+  status: {
+    type: DataTypes.ENUM('Preparing', 'Ready', 'Out for delivery', 'Delivered'),
+    defaultValue: 'Preparing',
   },
-  { timestamps: true }
-);
+  paymentMethod: { type: DataTypes.ENUM('cash', 'card'), defaultValue: 'cash' },
+  isPaid: { type: DataTypes.BOOLEAN, defaultValue: false },
+  paidAt: DataTypes.DATE,
+  deliveredAt: DataTypes.DATE,
+  deliveryFee: { type: DataTypes.FLOAT, defaultValue: 20 },
+  readyAt: { type: DataTypes.DATE, allowNull: true }, // ✅ حقل جديد
+}, { timestamps: true });
 
-const Order = mongoose.model('Order', orderSchema);
+User.hasMany(Order);
+Order.belongsTo(User);
+
+DeliveryDriver.hasMany(Order);
+Order.belongsTo(DeliveryDriver);
+
 export default Order;

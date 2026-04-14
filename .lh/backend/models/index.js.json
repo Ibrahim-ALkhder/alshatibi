@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/models/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776170780805,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776170780805,
+            "name": "Commit-0",
+            "content": "import sequelize from '../config/database.js';\r\nimport User from './User.js';\r\nimport Address from './Address.js';\r\nimport Category from './Category.js';\r\nimport MenuItem from './MenuItem.js';\r\nimport MenuItemOption from './MenuItemOption.js';\r\nimport OptionChoice from './OptionChoice.js';\r\nimport Order from './Order.js';\r\nimport OrderAddress from './OrderAddress.js';\r\nimport OrderItem from './OrderItem.js';\r\nimport DeliveryDriver from './DeliveryDriver.js';\r\n\r\n// العلاقات تم تعريفها داخل كل ملف نموذج، ولكن يمكن أيضاً تجميعها هنا للتأكيد\r\n\r\nconst models = {\r\n  User,\r\n  Address,\r\n  Category,\r\n  MenuItem,\r\n  MenuItemOption,\r\n  OptionChoice,\r\n  Order,\r\n  OrderAddress,\r\n  OrderItem,\r\n  DeliveryDriver,\r\n};\r\n\r\n// مزامنة قاعدة البيانات (اختياري)\r\nexport const syncDatabase = async (force = false) => {\r\n  await sequelize.sync({ force });\r\n  console.log('✅ Database synced');\r\n};\r\n\r\nexport default models;"
+        }
+    ]
+}

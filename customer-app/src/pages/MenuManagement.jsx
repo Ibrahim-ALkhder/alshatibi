@@ -51,7 +51,7 @@ const MenuManagement = () => {
     if (!window.confirm('هل أنت متأكد من حذف هذا الصنف؟')) return;
     try {
       await api.delete(`/menu/${id}`);
-      setItems(items.filter((item) => item._id !== id));
+      setItems(items.filter((item) => item.id !== id));
     } catch (err) {
       alert('فشل الحذف');
     }
@@ -63,7 +63,7 @@ const MenuManagement = () => {
       nameAr: item.nameAr,
       descriptionAr: item.descriptionAr || '',
       price: item.price,
-      category: item.category?._id || '',
+      category: item.CategoryId || item.category?.id || '',
       isAvailable: item.isAvailable,
       stock: item.stock || 0,
     });
@@ -77,7 +77,7 @@ const MenuManagement = () => {
       nameAr: '',
       descriptionAr: '',
       price: '',
-      category: categories[0]?._id || '',
+      category: categories[0]?.id || '',
       isAvailable: true,
       stock: 0,
     });
@@ -109,24 +109,19 @@ const MenuManagement = () => {
     data.append('price', formData.price);
     data.append('category', formData.category);
     data.append('isAvailable', formData.isAvailable);
-    data.append('stock', Number(formData.stock));
-
-    if (imageFile) {
-      data.append('image', imageFile);
-    }
+    data.append('stock', formData.stock);
+    if (imageFile) data.append('image', imageFile);
 
     try {
-      let res;
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
       if (editingItem) {
-        res = await api.put(`/menu/${editingItem._id}`, data, config);
-        setItems(items.map((item) => (item._id === editingItem._id ? res.data : item)));
+        const res = await api.put(`/menu/${editingItem.id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        setItems(items.map((item) => (item.id === editingItem.id ? res.data : item)));
       } else {
-        res = await api.post('/menu', data, config);
+        const res = await api.post('/menu', data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         setItems([res.data, ...items]);
       }
       setShowModal(false);
@@ -139,7 +134,7 @@ const MenuManagement = () => {
   };
 
   const categoryOptions = categories.map((cat) => ({
-    value: cat._id,
+    value: cat.id,
     label: cat.nameAr,
   }));
 
@@ -160,7 +155,7 @@ const MenuManagement = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -175,7 +170,7 @@ const MenuManagement = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {items.map((item) => (
-              <tr key={item._id}>
+              <tr key={item.id}>
                 <td className="px-4 py-2">
                   <img
                     src={getImageUrl(item.image)}
@@ -184,7 +179,7 @@ const MenuManagement = () => {
                   />
                 </td>
                 <td className="px-4 py-2">{item.nameAr}</td>
-                <td className="px-4 py-2">{item.category?.nameAr}</td>
+                <td className="px-4 py-2">{item.Category?.nameAr}</td>
                 <td className="px-4 py-2">{formatPrice(item.price)}</td>
                 <td className="px-4 py-2">{item.stock}</td>
                 <td className="px-4 py-2">
@@ -196,7 +191,7 @@ const MenuManagement = () => {
                   <button onClick={() => handleEdit(item)} className="text-blue-600 hover:underline ml-2">
                     تعديل
                   </button>
-                  <button onClick={() => handleDelete(item._id)} className="text-red-600 hover:underline">
+                  <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:underline">
                     حذف
                   </button>
                 </td>

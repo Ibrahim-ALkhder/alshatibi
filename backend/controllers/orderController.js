@@ -1,69 +1,191 @@
+import sequelize from '../config/database.js';
 import Order from '../models/Order.js';
+import OrderItem from '../models/OrderItem.js';
+import OrderAddress from '../models/OrderAddress.js';
 import MenuItem from '../models/MenuItem.js';
 import DeliveryDriver from '../models/DeliveryDriver.js';
+import User from '../models/User.js';
+import { Op } from 'sequelize';
+
+// ==================== دالة مساعدة لتخصيص الطلبات المعلقة (بدون معاملة) ====================
+export const tryAssignPendingOrders = async (io) => {
+  try {
+    const pendingOrder = await Order.findOne({
+      where: { status: 'Ready', DeliveryDriverId: null },
+      include: [
+        { model: OrderItem },
+        { model: User },
+        { model: OrderAddress },
+      ],
+      order: [['readyAt', 'ASC']],
+    });
+    if (!pendingOrder) return;
+
+    const availableDriver = await DeliveryDriver.findOne({
+      where: { status: 'available' },
+      include: [{ model: User }],
+    });
+    if (!availableDriver) {
+      console.log(`⚠️ لا يوجد مندوب متاح لتخصيص الطلب ${pendingOrder.id}`);
+      return;
+    }
+
+    pendingOrder.DeliveryDriverId = availableDriver.id;
+    availableDriver.status = 'busy';
+    availableDriver.currentOrderId = pendingOrder.id;
+    await pendingOrder.save();
+    await availableDriver.save();
+
+    if (io) {
+      io.to(availableDriver.UserId.toString()).emit('newDeliveryRequest', {
+        orderId: pendingOrder.id,
+        orderDetails: {
+          items: pendingOrder.OrderItems,
+          totalPrice: pendingOrder.totalPrice,
+          deliveryAddress: pendingOrder.OrderAddress,
+          phone: pendingOrder.phone,
+        },
+      });
+      console.log(`📨 تم تخصيص طلب مؤجل ${pendingOrder.id} للمندوب ${availableDriver.UserId}`);
+    }
+  } catch (error) {
+    console.error('❌ tryAssignPendingOrders Error:', error);
+  }
+};
 
 // ==================== إنشاء طلب جديد ====================
 export const addOrderItems = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  let orderId = null;
+
   try {
     const { items, totalPrice, deliveryAddress, phone, paymentMethod } = req.body;
 
     if (!items || items.length === 0) {
+      await transaction.rollback();
       return res.status(400).json({ message: 'لا توجد عناصر في الطلب' });
     }
 
-    const populatedItems = await Promise.all(
-      items.map(async (item) => {
-        const menuItem = await MenuItem.findById(item.menuItem);
-        if (!menuItem) throw new Error(`Menu item not found: ${item.menuItem}`);
-        if (menuItem.stock < item.quantity) {
-          throw new Error(`الكمية غير كافية للصنف: ${menuItem.nameAr}. المتاح: ${menuItem.stock}`);
-        }
-        menuItem.stock -= item.quantity;
-        await menuItem.save();
-        return {
-          menuItem: item.menuItem,
-          name: menuItem.name,
-          quantity: item.quantity,
-          price: menuItem.price,
-          options: item.options || [],
-        };
-      })
+    const orderItemsData = [];
+    for (const item of items) {
+      const menuItem = await MenuItem.findByPk(item.menuItem, { transaction });
+      if (!menuItem) {
+        await transaction.rollback();
+        return res.status(404).json({ message: `الصنف غير موجود: ${item.menuItem}` });
+      }
+      if (menuItem.stock < item.quantity) {
+        await transaction.rollback();
+        return res.status(400).json({
+          message: `الكمية غير كافية للصنف: ${menuItem.nameAr}. المتاح: ${menuItem.stock}`,
+        });
+      }
+      menuItem.stock -= item.quantity;
+      await menuItem.save({ transaction });
+
+      orderItemsData.push({
+        name: menuItem.nameAr,
+        quantity: item.quantity,
+        price: menuItem.price,
+        MenuItemId: menuItem.id,
+      });
+    }
+
+    const order = await Order.create(
+      {
+        totalPrice,
+        phone,
+        paymentMethod,
+        deliveryFee: 20,
+        UserId: req.user.id,
+      },
+      { transaction }
+    );
+    orderId = order.id;
+
+    await OrderAddress.create(
+      { ...deliveryAddress, OrderId: order.id },
+      { transaction }
     );
 
-    const order = new Order({
-      user: req.user._id,
-      items: populatedItems,
-      totalPrice, // الإجمالي القادم من الواجهة (يشمل رسوم التوصيل)
-      deliveryAddress,
-      phone,
-      paymentMethod,
-      deliveryFee: 20,
+    for (const itemData of orderItemsData) {
+      await OrderItem.create({ ...itemData, OrderId: order.id }, { transaction });
+    }
+
+    // ✅ commit المعاملة هنا
+    await transaction.commit();
+
+    // بعد commit، نجهز الاستجابة والإشعارات (لا تؤثر على قاعدة البيانات)
+    const createdOrder = await Order.findByPk(orderId, {
+      include: [
+        { model: OrderAddress },
+        { model: OrderItem },
+        { model: User, attributes: ['id', 'name', 'email', 'phone'] },
+      ],
     });
 
-    const createdOrder = await order.save();
+    const io = req.app.get('io');
+    if (io) {
+      io.to(req.user.id.toString()).emit('newOrderCreated', {
+        orderId: orderId,
+        order: createdOrder,
+      });
+    }
+
     res.status(201).json(createdOrder);
   } catch (error) {
+    // ⚠️ إذا كانت المعاملة لم تنته (لم يتم commit أو rollback بعد)، نقوم بـ rollback
+    if (transaction && !transaction.finished) {
+      await transaction.rollback();
+    }
     console.error('❌ addOrderItems Error:', error);
-    res.status(400).json({ message: error.message });
+    // تجنب إرسال استجابة إذا كانت قد أُرسلت بالفعل
+    if (!res.headersSent) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+};
+
+// ==================== طلبات المستخدم الحالي ====================
+export const getMyOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      where: { UserId: req.user.id },
+      include: [
+        { model: OrderItem },
+        { model: OrderAddress },
+        { model: DeliveryDriver, include: [{ model: User, attributes: ['name', 'phone'] }] },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+    res.json(orders);
+  } catch (error) {
+    console.error('❌ getMyOrders Error:', error);
+    res.status(500).json({ message: error.message });
   }
 };
 
 // ==================== الحصول على طلب واحد ====================
 export const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id)
-      .populate('user', 'name email phone')
-      .populate('driver', 'user')
-      .populate({ path: 'driver', populate: { path: 'user', select: 'name phone' } });
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        { model: User, attributes: ['id', 'name', 'email', 'phone'] },
+        { model: OrderAddress },
+        { model: OrderItem },
+        {
+          model: DeliveryDriver,
+          include: [{ model: User, attributes: ['id', 'name', 'phone'] }],
+        },
+      ],
+    });
     if (!order) return res.status(404).json({ message: 'الطلب غير موجود' });
-    if (
-      req.user.role !== 'admin' &&
-      req.user.role !== 'staff' &&
-      req.user.role !== 'driver'
-    ) {
-      if (order.user._id.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'غير مصرح' });
-      }
+
+    const isAdminOrStaff = ['admin', 'staff'].includes(req.user.role);
+    const isOwner = order.UserId === req.user.id;
+    const isAssignedDriver = order.DeliveryDriver?.UserId === req.user.id;
+
+    if (!isAdminOrStaff && !isOwner && !isAssignedDriver) {
+      return res.status(403).json({ message: 'غير مصرح بعرض هذا الطلب' });
     }
     res.json(order);
   } catch (error) {
@@ -75,12 +197,12 @@ export const getOrderById = async (req, res) => {
 // ==================== تحديث حالة الدفع ====================
 export const updateOrderToPaid = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findByPk(req.params.id);
     if (!order) return res.status(404).json({ message: 'الطلب غير موجود' });
     order.isPaid = true;
-    order.paidAt = Date.now();
-    const updatedOrder = await order.save();
-    res.json(updatedOrder);
+    order.paidAt = new Date();
+    await order.save();
+    res.json(order);
   } catch (error) {
     console.error('❌ updateOrderToPaid Error:', error);
     res.status(500).json({ message: error.message });
@@ -89,81 +211,127 @@ export const updateOrderToPaid = async (req, res) => {
 
 // ==================== تحديث حالة الطلب (مدير / موظف) ====================
 export const updateOrderStatus = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { status } = req.body;
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: 'الطلب غير موجود' });
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        { model: OrderItem },
+        { model: User },
+        { model: OrderAddress },
+      ],
+      transaction,
+    });
+    if (!order) {
+      await transaction.rollback();
+      return res.status(404).json({ message: 'الطلب غير موجود' });
+    }
 
     const oldStatus = order.status;
     order.status = status;
+    if (status === 'Delivered') order.deliveredAt = new Date();
 
-    if (status === 'Delivered') {
-      order.deliveredAt = Date.now();
-    }
-
-    // تخصيص مندوب تلقائي عند تغيير الحالة إلى "جاهز" لأول مرة
-    if (status === 'Ready' && oldStatus !== 'Ready' && !order.driver) {
-      console.log(`🔍 [طلب ${order._id}] البحث عن مندوب متاح...`);
-
-      const availableDriver = await DeliveryDriver.findOne({ status: 'available' });
-
-      if (availableDriver) {
-        console.log(`✅ [طلب ${order._id}] وجد مندوب متاح: ${availableDriver.user}`);
-        order.driver = availableDriver._id;
-        availableDriver.status = 'busy';
-        availableDriver.currentOrder = order._id;
-        await availableDriver.save();
-
-        const io = req.app.get('io');
-        if (io) {
-          io.to(availableDriver.user.toString()).emit('newDeliveryRequest', {
-            orderId: order._id,
-            orderDetails: {
-              items: order.items,
-              totalPrice: order.totalPrice,
-              deliveryAddress: order.deliveryAddress,
-              phone: order.phone,
-            },
-          });
-          console.log(`📨 [طلب ${order._id}] إشعار أرسل إلى ${availableDriver.user}`);
+    // عند Ready
+    if (status === 'Ready' && oldStatus !== 'Ready') {
+      order.readyAt = new Date();
+      if (!order.DeliveryDriverId) {
+        const availableDriver = await DeliveryDriver.findOne({
+          where: { status: 'available' },
+          transaction,
+        });
+        if (availableDriver) {
+          order.DeliveryDriverId = availableDriver.id;
+          availableDriver.status = 'busy';
+          availableDriver.currentOrderId = order.id;
+          await availableDriver.save({ transaction });
+        } else {
+          console.log(`⚠️ [طلب ${order.id}] لا يوجد مندوب متاح الآن. في انتظار مندوب...`);
         }
-      } else {
-        console.warn(`⚠️ [طلب ${order._id}] لا يوجد مندوب متاح حاليًا`);
       }
     }
+    if (status === 'Ready' && oldStatus !== 'Ready') {
+  order.readyAt = new Date();
+  if (!order.DeliveryDriverId) {
+    const availableDriver = await DeliveryDriver.findOne({
+      where: { status: 'available' },
+      transaction,
+    });
+    if (availableDriver) {
+      order.DeliveryDriverId = availableDriver.id;
+      availableDriver.status = 'busy';
+      availableDriver.currentOrderId = order.id;
+      await availableDriver.save({ transaction });
+    } else {
+      console.log(`⚠️ [طلب ${order.id}] لا يوجد مندوب متاح الآن. في انتظار مندوب...`);
+      // إرسال إشعار للعميل عبر Socket.io
+      const io = req.app.get('io');
+      if (io) {
+        io.to(order.UserId.toString()).emit('driverUnavailable', {
+          orderId: order.id,
+          message: 'طلبك جاهز ولكن جميع المناديب مشغولون حاليًا. سنقوم بتوصيله في أقرب وقت.',
+        });
+      }
+    }
+  }
+}
 
-    const updatedOrder = await order.save();
+    await order.save({ transaction });
+    await transaction.commit();
+
+    const updatedOrder = await Order.findByPk(order.id, {
+      include: [OrderAddress, OrderItem],
+    });
 
     const io = req.app.get('io');
     if (io) {
-      io.to(order.user.toString()).emit('orderStatusUpdated', {
-        orderId: order._id,
+      io.to(order.UserId.toString()).emit('orderStatusUpdated', {
+        orderId: order.id,
         status: order.status,
       });
+      if (status === 'Ready' && updatedOrder.DeliveryDriverId) {
+        const driver = await DeliveryDriver.findByPk(updatedOrder.DeliveryDriverId);
+        if (driver) {
+          io.to(driver.UserId.toString()).emit('newDeliveryRequest', {
+            orderId: order.id,
+            orderDetails: {
+              items: updatedOrder.OrderItems,
+              totalPrice: updatedOrder.totalPrice,
+              deliveryAddress: updatedOrder.OrderAddress,
+              phone: updatedOrder.phone,
+            },
+          });
+          console.log(`📨 [طلب ${order.id}] إشعار أرسل إلى المندوب ${driver.UserId}`);
+        }
+      }
     }
+
+    // محاولة تخصيص طلبات معلقة بعد التحديث
+    tryAssignPendingOrders(io);
 
     res.json(updatedOrder);
   } catch (error) {
+    if (transaction && !transaction.finished) {
+      await transaction.rollback();
+    }
     console.error('❌ updateOrderStatus Error:', error);
-    res.status(400).json({ message: error.message });
+    if (!res.headersSent) {
+      res.status(400).json({ message: error.message });
+    }
   }
 };
 
-// ==================== طلبات المستخدم الحالي ====================
-export const getMyOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ user: req.user._id }).sort('-createdAt');
-    res.json(orders);
-  } catch (error) {
-    console.error('❌ getMyOrders Error:', error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// ==================== جميع الطلبات (مدير فقط) ====================
+// ==================== جميع الطلبات (مدير وموظف) ====================
 export const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({}).populate('user', 'id name email').sort('-createdAt');
+    const orders = await Order.findAll({
+      include: [
+        { model: User, attributes: ['id', 'name', 'email'] },
+        { model: OrderItem },
+        { model: OrderAddress },
+        { model: DeliveryDriver, include: [{ model: User, attributes: ['name', 'phone'] }] },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
     res.json(orders);
   } catch (error) {
     console.error('❌ getOrders Error:', error);
@@ -175,29 +343,20 @@ export const getOrders = async (req, res) => {
 export const getOrderStats = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    let dateFilter = {};
-    if (startDate && startDate !== 'null' && startDate !== 'undefined') {
-      dateFilter.createdAt = { $gte: new Date(startDate) };
-    }
-    if (endDate && endDate !== 'null' && endDate !== 'undefined') {
-      dateFilter.createdAt = { ...dateFilter.createdAt, $lte: new Date(endDate) };
-    }
+    const where = {};
+    if (startDate && startDate !== 'null') where.createdAt = { [Op.gte]: new Date(startDate) };
+    if (endDate && endDate !== 'null') where.createdAt = { ...where.createdAt, [Op.lte]: new Date(endDate) };
 
-    const deliveredOrders = await Order.find({ ...dateFilter, status: 'Delivered' });
-    const totalRevenue = deliveredOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+    const deliveredOrders = await Order.findAll({ where: { ...where, status: 'Delivered' } });
+    const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.totalPrice, 0);
     const totalOrders = deliveredOrders.length;
-    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    const avg = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-    const statusCounts = await Order.aggregate([
-      { $match: dateFilter },
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]);
+    const allOrders = await Order.findAll({ where, attributes: ['status'] });
     const ordersByStatus = {};
-    statusCounts.forEach((item) => {
-      ordersByStatus[item._id] = item.count;
-    });
+    allOrders.forEach(o => { ordersByStatus[o.status] = (ordersByStatus[o.status] || 0) + 1; });
 
-    res.json({ totalRevenue, totalOrders, averageOrderValue, ordersByStatus });
+    res.json({ totalRevenue, totalOrders, averageOrderValue: avg, ordersByStatus });
   } catch (error) {
     console.error('❌ getOrderStats Error:', error);
     res.status(500).json({ message: error.message });
@@ -208,25 +367,19 @@ export const getOrderStats = async (req, res) => {
 export const getDailyStats = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    let dateFilter = { status: 'Delivered' };
-    if (startDate && startDate !== 'null' && startDate !== 'undefined') {
-      dateFilter.createdAt = { $gte: new Date(startDate) };
-    }
-    if (endDate && endDate !== 'null' && endDate !== 'undefined') {
-      dateFilter.createdAt = { ...dateFilter.createdAt, $lte: new Date(endDate) };
-    }
+    const where = { status: 'Delivered' };
+    if (startDate && startDate !== 'null') where.createdAt = { [Op.gte]: new Date(startDate) };
+    if (endDate && endDate !== 'null') where.createdAt = { ...where.createdAt, [Op.lte]: new Date(endDate) };
 
-    const dailyData = await Order.aggregate([
-      { $match: dateFilter },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          revenue: { $sum: '$totalPrice' },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
+    const orders = await Order.findAll({ where, attributes: ['createdAt', 'totalPrice'] });
+    const dailyMap = {};
+    orders.forEach(o => {
+      const d = o.createdAt.toISOString().split('T')[0];
+      if (!dailyMap[d]) dailyMap[d] = { revenue: 0, count: 0 };
+      dailyMap[d].revenue += o.totalPrice;
+      dailyMap[d].count += 1;
+    });
+    const dailyData = Object.entries(dailyMap).map(([d, v]) => ({ _id: d, ...v })).sort((a,b) => a._id.localeCompare(b._id));
     res.json(dailyData);
   } catch (error) {
     console.error('❌ getDailyStats Error:', error);
@@ -238,14 +391,19 @@ export const getDailyStats = async (req, res) => {
 export const getOrdersForExport = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    let dateFilter = { status: 'Delivered' };
-    if (startDate && startDate !== 'null' && startDate !== 'undefined') {
-      dateFilter.createdAt = { $gte: new Date(startDate) };
-    }
-    if (endDate && endDate !== 'null' && endDate !== 'undefined') {
-      dateFilter.createdAt = { ...dateFilter.createdAt, $lte: new Date(endDate) };
-    }
-    const orders = await Order.find(dateFilter).populate('user', 'name email phone').sort('-createdAt');
+    const where = { status: 'Delivered' };
+    if (startDate && startDate !== 'null') where.createdAt = { [Op.gte]: new Date(startDate) };
+    if (endDate && endDate !== 'null') where.createdAt = { ...where.createdAt, [Op.lte]: new Date(endDate) };
+
+    const orders = await Order.findAll({
+      where,
+      include: [
+        { model: User, attributes: ['name', 'email', 'phone'] },
+        { model: OrderItem },
+        { model: OrderAddress },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
     res.json(orders);
   } catch (error) {
     console.error('❌ getOrdersForExport Error:', error);
@@ -254,17 +412,16 @@ export const getOrdersForExport = async (req, res) => {
 };
 
 // ==================== دوال المندوب ====================
-
 export const getDriverOrders = async (req, res) => {
   try {
-    const driver = await DeliveryDriver.findOne({ user: req.user._id });
-    if (!driver) return res.status(404).json({ message: 'Driver profile not found' });
-    const orders = await Order.find({
-      driver: driver._id,
-      status: { $ne: 'Delivered' },
-    })
-      .populate('user', 'name phone address')
-      .sort('-createdAt');
+    const driver = await DeliveryDriver.findOne({ where: { UserId: req.user.id } });
+    if (!driver) return res.status(404).json({ message: 'لم يتم العثور على ملف المندوب' });
+
+    const orders = await Order.findAll({
+      where: { DeliveryDriverId: driver.id, status: { [Op.ne]: 'Delivered' } },
+      include: [{ model: User, attributes: ['name', 'phone'] }, OrderAddress, OrderItem],
+      order: [['createdAt', 'DESC']],
+    });
     res.json(orders);
   } catch (error) {
     console.error('❌ getDriverOrders Error:', error);
@@ -273,66 +430,74 @@ export const getDriverOrders = async (req, res) => {
 };
 
 export const updateOrderStatusByDriver = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { status } = req.body;
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: 'الطلب غير موجود' });
+    const order = await Order.findByPk(req.params.id, { transaction });
+    if (!order) {
+      await transaction.rollback();
+      return res.status(404).json({ message: 'الطلب غير موجود' });
+    }
 
-    const driver = await DeliveryDriver.findOne({ user: req.user._id });
-    if (!driver || order.driver.toString() !== driver._id.toString()) {
+    const driver = await DeliveryDriver.findOne({ where: { UserId: req.user.id }, transaction });
+    if (!driver || order.DeliveryDriverId !== driver.id) {
+      await transaction.rollback();
       return res.status(403).json({ message: 'غير مصرح' });
     }
 
     if (!['Out for delivery', 'Delivered'].includes(status)) {
+      await transaction.rollback();
       return res.status(400).json({ message: 'حالة غير صالحة' });
     }
-
     if (status === 'Out for delivery' && order.status !== 'Ready') {
+      await transaction.rollback();
       return res.status(400).json({ message: 'يجب أن يكون الطلب جاهزاً أولاً' });
     }
     if (status === 'Delivered' && order.status !== 'Out for delivery') {
+      await transaction.rollback();
       return res.status(400).json({ message: 'يجب أن يكون الطلب قيد التوصيل أولاً' });
     }
 
     order.status = status;
     if (status === 'Delivered') {
-      order.deliveredAt = Date.now();
+      order.deliveredAt = new Date();
       driver.status = 'available';
-      driver.currentOrder = null;
+      driver.currentOrderId = null;
       driver.totalDeliveries += 1;
-      await driver.save();
+      await driver.save({ transaction });
     }
+    await order.save({ transaction });
+    await transaction.commit();
 
-    const updatedOrder = await order.save();
-
+    const updatedOrder = await Order.findByPk(order.id, { include: [OrderAddress, OrderItem] });
     const io = req.app.get('io');
     if (io) {
-      io.to(order.user.toString()).emit('orderStatusUpdated', {
-        orderId: order._id,
-        status: order.status,
-      });
+      io.to(order.UserId.toString()).emit('orderStatusUpdated', { orderId: order.id, status: order.status });
+    }
+
+    if (status === 'Delivered') {
+      tryAssignPendingOrders(io);
     }
 
     res.json(updatedOrder);
   } catch (error) {
+    if (transaction && !transaction.finished) await transaction.rollback();
     console.error('❌ updateOrderStatusByDriver Error:', error);
-    res.status(400).json({ message: error.message });
+    if (!res.headersSent) res.status(400).json({ message: error.message });
   }
 };
 
 export const getDriverHistory = async (req, res) => {
   try {
-    const driver = await DeliveryDriver.findOne({ user: req.user._id });
+    const driver = await DeliveryDriver.findOne({ where: { UserId: req.user.id } });
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
 
-    const completedOrders = await Order.find({
-      driver: driver._id,
-      status: 'Delivered',
-    })
-      .populate('user', 'name phone')
-      .sort('-deliveredAt')
-      .limit(5);
-
+    const completedOrders = await Order.findAll({
+      where: { DeliveryDriverId: driver.id, status: 'Delivered' },
+      include: [{ model: User, attributes: ['name', 'phone'] }],
+      order: [['deliveredAt', 'DESC']],
+      limit: 5,
+    });
     res.json(completedOrders);
   } catch (error) {
     console.error('❌ getDriverHistory Error:', error);
@@ -347,17 +512,19 @@ export const updateDriverStatus = async (req, res) => {
       return res.status(400).json({ message: 'يمكنك فقط اختيار "متاح" أو "غير متصل"' });
     }
 
-    const driver = await DeliveryDriver.findOne({ user: req.user._id });
-    if (!driver) {
-      return res.status(404).json({ message: 'لم يتم العثور على ملف المندوب' });
-    }
-
+    const driver = await DeliveryDriver.findOne({ where: { UserId: req.user.id } });
+    if (!driver) return res.status(404).json({ message: 'لم يتم العثور على ملف المندوب' });
     if (driver.status === 'busy') {
       return res.status(400).json({ message: 'لا يمكنك تغيير حالتك أثناء توصيل طلب' });
     }
 
     driver.status = status;
     await driver.save();
+
+    if (status === 'available') {
+      const io = req.app.get('io');
+      tryAssignPendingOrders(io);
+    }
 
     res.json({ status: driver.status });
   } catch (error) {
@@ -368,24 +535,36 @@ export const updateDriverStatus = async (req, res) => {
 
 export const getDriverStatus = async (req, res) => {
   try {
-    const driver = await DeliveryDriver.findOne({ user: req.user._id });
+    const driver = await DeliveryDriver.findOne({ where: { UserId: req.user.id } });
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
     res.json({ status: driver.status });
   } catch (error) {
+    console.error('❌ getDriverStatus Error:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const ensureDriverProfile = async (req, res) => {
   try {
-    let driver = await DeliveryDriver.findOne({ user: req.user._id });
+    let driver = await DeliveryDriver.findOne({ where: { UserId: req.user.id } });
     if (!driver) {
-      driver = await DeliveryDriver.create({ user: req.user._id, status: 'available' });
-      console.log(`✅ تم إنشاء ملف مندوب جديد للمستخدم ${req.user._id}`);
+      driver = await DeliveryDriver.create({ UserId: req.user.id, status: 'available' });
+      console.log(`✅ تم إنشاء ملف مندوب جديد للمستخدم ${req.user.id}`);
     }
     res.json({ status: driver.status });
   } catch (error) {
     console.error('❌ ensureDriverProfile Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ==================== تخصيص يدوي للطلبات المعلقة (للإدارة) ====================
+export const assignPendingOrders = async (req, res) => {
+  try {
+    const io = req.app.get('io');
+    await tryAssignPendingOrders(io);
+    res.json({ message: 'تمت محاولة تخصيص الطلبات المعلقة' });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };

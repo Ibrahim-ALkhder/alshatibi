@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/models/OrderAddress.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776170335528,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776170841511,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,6 +1,7 @@\n import { DataTypes } from 'sequelize';\r\n import sequelize from '../config/database.js';\r\n+import Order from './Order.js';\r\n \r\n const OrderAddress = sequelize.define('OrderAddress', {\r\n   street: DataTypes.STRING,\r\n   city: DataTypes.STRING,\r\n@@ -10,5 +11,8 @@\n   apartment: DataTypes.STRING,\r\n   notes: DataTypes.STRING,\r\n });\r\n \r\n+Order.hasOne(OrderAddress, { onDelete: 'CASCADE' });\r\n+OrderAddress.belongsTo(Order);\r\n+\r\n export default OrderAddress;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776170335528,
+            "name": "Commit-0",
+            "content": "import { DataTypes } from 'sequelize';\r\nimport sequelize from '../config/database.js';\r\n\r\nconst OrderAddress = sequelize.define('OrderAddress', {\r\n  street: DataTypes.STRING,\r\n  city: DataTypes.STRING,\r\n  area: DataTypes.STRING,\r\n  building: DataTypes.STRING,\r\n  floor: DataTypes.STRING,\r\n  apartment: DataTypes.STRING,\r\n  notes: DataTypes.STRING,\r\n});\r\n\r\nexport default OrderAddress;"
+        }
+    ]
+}

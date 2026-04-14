@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/config/database.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1776171104922,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1776171104922,
+            "name": "Commit-0",
+            "content": "import { Sequelize } from 'sequelize';\r\n\r\nconst sequelize = new Sequelize({\r\n  dialect: 'sqlite',\r\n  storage: './database.sqlite',\r\n  logging: false,\r\n});\r\n\r\nexport default sequelize;"
+        }
+    ]
+}

@@ -22,12 +22,18 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
-  const [summary, setSummary] = useState(null);
+  const [error, setError] = useState(null);
+  const [summary, setSummary] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+    averageOrderValue: 0,
+    ordersByStatus: {},
+  });
   const [dailyData, setDailyData] = useState([]);
   const [exportOrders, setExportOrders] = useState([]);
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().setDate(new Date().getDate() - 30)),
-    endDate: new Date()
+    endDate: new Date(),
   });
   const [quickRange, setQuickRange] = useState('month');
 
@@ -37,6 +43,7 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = {};
       if (dateRange.startDate && dateRange.endDate) {
@@ -44,23 +51,38 @@ const Dashboard = () => {
         params.endDate = dateRange.endDate.toISOString();
       }
 
-      console.log('📡 Fetching stats with params:', params);
-
-      const [summaryRes, dailyRes, ordersRes] = await Promise.all([
+      const [summaryRes, dailyRes, ordersRes] = await Promise.allSettled([
         api.get('/orders/stats/summary', { params }),
         api.get('/orders/stats/daily', { params }),
-        api.get('/orders/export', { params })
+        api.get('/orders/export', { params }),
       ]);
 
-      console.log('📊 Summary:', summaryRes.data);
-      console.log('📈 Daily:', dailyRes.data);
-      console.log('📦 Export orders count:', ordersRes.data.length);
+      // معالجة الملخص
+      if (summaryRes.status === 'fulfilled') {
+        setSummary(summaryRes.value.data);
+      } else {
+        console.error('Summary error:', summaryRes.reason);
+        setError('فشل تحميل الإحصائيات العامة');
+      }
 
-      setSummary(summaryRes.data);
-      setDailyData(dailyRes.data);
-      setExportOrders(ordersRes.data);
+      // معالجة البيانات اليومية
+      if (dailyRes.status === 'fulfilled') {
+        setDailyData(dailyRes.value.data);
+      } else {
+        console.error('Daily stats error:', dailyRes.reason);
+        setDailyData([]);
+      }
+
+      // معالجة طلبات التصدير
+      if (ordersRes.status === 'fulfilled') {
+        setExportOrders(ordersRes.value.data);
+      } else {
+        console.error('Export orders error:', ordersRes.reason);
+        setExportOrders([]);
+      }
     } catch (error) {
-      console.error('❌ Dashboard fetch error:', error);
+      console.error('Dashboard fetch error:', error);
+      setError('حدث خطأ غير متوقع أثناء تحميل البيانات');
     } finally {
       setLoading(false);
     }
@@ -69,21 +91,26 @@ const Dashboard = () => {
   const handleQuickRange = (range) => {
     const today = new Date();
     let start = new Date();
-    if (range === 'today') start = today;
-    else if (range === 'week') start.setDate(today.getDate() - 7);
-    else if (range === 'month') start.setMonth(today.getMonth() - 1);
+    if (range === 'today') {
+      start = today;
+    } else if (range === 'week') {
+      start.setDate(today.getDate() - 7);
+    } else if (range === 'month') {
+      start.setMonth(today.getMonth() - 1);
+    }
     setDateRange({ startDate: start, endDate: today });
     setQuickRange(range);
   };
 
   const exportToExcel = () => {
-    const dataForExcel = exportOrders.map(order => ({
-      'رقم الطلب': order._id.slice(-6).toUpperCase(),
-      'العميل': order.user?.name,
-      'الهاتف': order.phone,
-      'التاريخ': new Date(order.createdAt).toLocaleDateString('ar-EG'),
-      'الإجمالي': order.totalPrice,
-      'العناصر': order.items.map(i => `${i.quantity}x ${i.name}`).join('، ')
+    const dataForExcel = exportOrders.map((order) => ({
+      'رقم الطلب': order.id?.toString().slice(-6).toUpperCase() || '',
+      العميل: order.User?.name || '',
+      الهاتف: order.phone || '',
+      التاريخ: order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-EG') : '',
+      الإجمالي: order.totalPrice || 0,
+      العناصر:
+        order.OrderItems?.map((i) => `${i.quantity}x ${i.name}`).join('، ') || '',
     }));
     const ws = XLSX.utils.json_to_sheet(dataForExcel);
     const wb = XLSX.utils.book_new();
@@ -91,32 +118,37 @@ const Dashboard = () => {
     XLSX.writeFile(wb, `مبيعات_الشطبي_${new Date().toLocaleDateString()}.xlsx`);
   };
 
+  // تجهيز بيانات الرسم البياني الشريطي
   const barChartData = {
-    labels: dailyData.map(d => d._id),
-    datasets: [{
-      label: 'الإيرادات (ج.م)',
-      data: dailyData.map(d => d.revenue),
-      backgroundColor: 'rgba(249, 115, 22, 0.6)',
-      borderColor: '#f97316',
-      borderWidth: 1,
-    }]
+    labels: dailyData.map((d) => d._id),
+    datasets: [
+      {
+        label: 'الإيرادات (ج.م)',
+        data: dailyData.map((d) => d.revenue || 0),
+        backgroundColor: 'rgba(249, 115, 22, 0.6)',
+        borderColor: '#f97316',
+        borderWidth: 1,
+      },
+    ],
   };
 
   const barOptions = {
     responsive: true,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: 'الإيرادات اليومية' }
-    }
+      title: { display: true, text: 'الإيرادات اليومية' },
+    },
   };
 
   const statusChartData = {
-    labels: summary ? Object.keys(summary.ordersByStatus || {}) : [],
-    datasets: [{
-      label: 'عدد الطلبات',
-      data: summary ? Object.values(summary.ordersByStatus || {}) : [],
-      backgroundColor: ['#fbbf24', '#3b82f6', '#a855f7', '#22c55e'],
-    }]
+    labels: Object.keys(summary?.ordersByStatus || {}),
+    datasets: [
+      {
+        label: 'عدد الطلبات',
+        data: Object.values(summary?.ordersByStatus || {}),
+        backgroundColor: ['#fbbf24', '#3b82f6', '#a855f7', '#22c55e'],
+      },
+    ],
   };
 
   if (loading) return <Loader fullScreen />;
@@ -125,13 +157,22 @@ const Dashboard = () => {
     <div dir="rtl" className="p-4 md:p-6">
       <h1 className="text-3xl font-bold mb-6">لوحة التحكم - الإحصائيات</h1>
 
-      {/* Date Range Controls */}
+      {/* رسالة خطأ عامة */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <p className="font-bold">⚠️ خطأ</p>
+          <p>{error}</p>
+          <p className="text-sm mt-2">تأكد من تشغيل الباك-إند ومن وجود طلبات مكتملة.</p>
+        </div>
+      )}
+
+      {/* أدوات تحديد التاريخ */}
       <div className="flex flex-wrap gap-4 items-end mb-6">
         <div>
           <label className="block text-sm mb-1">من</label>
           <DatePicker
             selected={dateRange.startDate}
-            onChange={(date) => setDateRange(prev => ({ ...prev, startDate: date }))}
+            onChange={(date) => setDateRange((prev) => ({ ...prev, startDate: date }))}
             selectsStart
             startDate={dateRange.startDate}
             endDate={dateRange.endDate}
@@ -143,7 +184,7 @@ const Dashboard = () => {
           <label className="block text-sm mb-1">إلى</label>
           <DatePicker
             selected={dateRange.endDate}
-            onChange={(date) => setDateRange(prev => ({ ...prev, endDate: date }))}
+            onChange={(date) => setDateRange((prev) => ({ ...prev, endDate: date }))}
             selectsEnd
             startDate={dateRange.startDate}
             endDate={dateRange.endDate}
@@ -153,18 +194,37 @@ const Dashboard = () => {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant={quickRange === 'today' ? 'primary' : 'secondary'} onClick={() => handleQuickRange('today')}>اليوم</Button>
-          <Button variant={quickRange === 'week' ? 'primary' : 'secondary'} onClick={() => handleQuickRange('week')}>أسبوع</Button>
-          <Button variant={quickRange === 'month' ? 'primary' : 'secondary'} onClick={() => handleQuickRange('month')}>شهر</Button>
+          <Button
+            variant={quickRange === 'today' ? 'primary' : 'secondary'}
+            onClick={() => handleQuickRange('today')}
+          >
+            اليوم
+          </Button>
+          <Button
+            variant={quickRange === 'week' ? 'primary' : 'secondary'}
+            onClick={() => handleQuickRange('week')}
+          >
+            أسبوع
+          </Button>
+          <Button
+            variant={quickRange === 'month' ? 'primary' : 'secondary'}
+            onClick={() => handleQuickRange('month')}
+          >
+            شهر
+          </Button>
         </div>
-        <Button onClick={fetchData} variant="secondary">تحديث</Button>
+        <Button onClick={fetchData} variant="secondary">
+          تحديث
+        </Button>
       </div>
 
-      {/* Summary Cards */}
+      {/* بطاقات ملخص */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-500 text-sm">إجمالي المبيعات</h3>
-          <p className="text-3xl font-bold text-primary-600">{formatPrice(summary?.totalRevenue || 0)}</p>
+          <p className="text-3xl font-bold text-primary-600">
+            {formatPrice(summary?.totalRevenue || 0)}
+          </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-500 text-sm">عدد الطلبات المكتملة</h3>
@@ -172,43 +232,55 @@ const Dashboard = () => {
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-500 text-sm">متوسط قيمة الطلب</h3>
-          <p className="text-3xl font-bold text-primary-600">{formatPrice(summary?.averageOrderValue || 0)}</p>
+          <p className="text-3xl font-bold text-primary-600">
+            {formatPrice(summary?.averageOrderValue || 0)}
+          </p>
         </div>
       </div>
 
       {/* رسالة في حالة عدم وجود طلبات مكتملة */}
-      {summary?.totalOrders === 0 && (
+      {summary?.totalOrders === 0 && !error && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-6">
-          ⚠️ لا توجد طلبات مكتملة (Delivered) ضمن الفترة المحددة. يرجى تغيير نطاق التاريخ أو تغيير حالة بعض الطلبات إلى "تم التوصيل".
+          ⚠️ لا توجد طلبات مكتملة (Delivered) ضمن الفترة المحددة. يرجى تغيير نطاق التاريخ أو
+          تغيير حالة بعض الطلبات إلى "تم التوصيل".
         </div>
       )}
 
-      {/* Charts */}
-      {/* Charts Section */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-  {/* Bar Chart */}
-  <div className="bg-white p-4 rounded-lg shadow">
-    <Bar data={barChartData} options={barOptions} />
-  </div>
-
-  {/* Doughnut Chart - حجم مصغر */}
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h3 className="text-lg font-semibold mb-4 text-center">توزيع حالة الطلبات</h3>
-    {summary && Object.keys(summary.ordersByStatus || {}).length > 0 ? (
-      <div className="w-64 h-64 mx-auto">
-        <Doughnut data={statusChartData} options={{ maintainAspectRatio: true }} />
-      </div>
-    ) : (
-      <p className="text-center text-gray-500">لا توجد بيانات كافية</p>
-    )}
-  </div>
+      {/* الرسوم البيانية */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="bg-white p-4 rounded-lg shadow">
+          {dailyData.length > 0 ? (
+            <Bar data={barChartData} options={barOptions} />
+          ) : (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              لا توجد بيانات كافية للرسم البياني
+            </div>
+          )}
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow">
+  <h3 className="text-lg font-semibold mb-4 text-center">توزيع حالة الطلبات</h3>
+  {Object.keys(summary?.ordersByStatus || {}).length > 0 ? (
+    <div className="w-56 h-56 sm:w-64 sm:h-64 mx-auto">
+      <Doughnut 
+        data={statusChartData} 
+        options={{ maintainAspectRatio: true, responsive: true }}
+      />
+    </div>
+  ) : (
+    <div className="h-64 flex items-center justify-center text-gray-500">
+      لا توجد بيانات
+    </div>
+  )}
 </div>
+      </div>
 
-      {/* Export Section */}
+      {/* قسم التصدير */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">قائمة الطلبات المكتملة</h2>
-          <Button onClick={exportToExcel} variant="primary">تصدير إلى Excel</Button>
+          <Button onClick={exportToExcel} variant="primary">
+            تصدير إلى Excel
+          </Button>
         </div>
         <p className="text-sm text-gray-600 mb-4">عدد الطلبات: {exportOrders.length}</p>
         <div className="overflow-x-auto max-h-96">
@@ -222,11 +294,13 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {exportOrders.slice(0, 20).map(order => (
-                <tr key={order._id}>
-                  <td className="px-4 py-2">#{order._id.slice(-6).toUpperCase()}</td>
-                  <td className="px-4 py-2">{order.user?.name}</td>
-                  <td className="px-4 py-2">{new Date(order.createdAt).toLocaleDateString('ar-EG')}</td>
+              {exportOrders.slice(0, 20).map((order) => (
+                <tr key={order.id}>
+                  <td className="px-4 py-2">#{order.id?.toString().slice(-6).toUpperCase()}</td>
+                  <td className="px-4 py-2">{order.User?.name}</td>
+                  <td className="px-4 py-2">
+                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-EG') : '-'}
+                  </td>
                   <td className="px-4 py-2">{formatPrice(order.totalPrice)}</td>
                 </tr>
               ))}

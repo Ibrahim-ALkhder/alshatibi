@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../context/CartContext';
-import { formatPrice } from '../utils/formatters';
+import { formatPrice, getImageUrl } from '../utils/formatters';
 import Loader from '../components/UI/Loader';
 import Button from '../components/UI/Button';
 import { PlusIcon, MinusIcon } from '../components/UI/Icons';
@@ -51,13 +51,14 @@ const ItemDetail = () => {
     return total * quantity;
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e?.preventDefault();
     if (!item || item.stock < quantity) {
       alert('الكمية المطلوبة غير متوفرة');
       return;
     }
     const cartItem = {
-      menuItem: item._id,
+      menuItem: item.id,
       name: item.nameAr,
       price: item.price,
       quantity,
@@ -65,8 +66,8 @@ const ItemDetail = () => {
         name,
         choice: choice.nameAr || choice.name,
         price: choice.price || 0,
-        image: item.image,
       })),
+      image: item.image,
     };
     addToCart(cartItem);
     navigate('/cart');
@@ -83,7 +84,7 @@ const ItemDetail = () => {
         <div className="md:flex">
           <div className="md:w-1/2">
             <img
-              src={item.image || 'https://via.placeholder.com/500x400?text=الشطبي'}
+              src={getImageUrl(item.image)}
               alt={item.nameAr}
               className="w-full h-64 md:h-full object-cover"
             />

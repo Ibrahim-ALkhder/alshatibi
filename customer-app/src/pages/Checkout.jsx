@@ -58,9 +58,9 @@ const Checkout = () => {
         items: items.map((item) => ({
           menuItem: item.menuItem,
           quantity: item.quantity,
-          options: item.options,
+          options: item.options || [],
         })),
-        totalPrice: finalTotal, // الإجمالي شامل التوصيل
+        totalPrice: finalTotal,
         deliveryAddress: formData.deliveryAddress,
         phone: formData.phone,
         paymentMethod: formData.paymentMethod,
@@ -68,7 +68,8 @@ const Checkout = () => {
 
       const { data } = await api.post('/orders', orderData);
       clearCart();
-      navigate(`/tracking/${data._id}`);
+      // استخدام data.id بدلاً من data._id
+      navigate(`/tracking/${data.id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'حدث خطأ أثناء إنشاء الطلب');
     } finally {
@@ -181,7 +182,6 @@ const Checkout = () => {
           </form>
         </div>
 
-        {/* ملخص الطلب مع تفصيل التوصيل */}
         <div className="bg-gray-50 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-4">ملخص الطلب</h2>
           <div className="space-y-3 mb-4">

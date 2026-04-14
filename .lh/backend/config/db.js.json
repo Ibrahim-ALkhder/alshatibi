@@ -1,0 +1,26 @@
+{
+    "sourceFile": "backend/config/db.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1776170171052,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776170759171,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -2,8 +2,8 @@\n \r\n const sequelize = new Sequelize({\r\n   dialect: 'sqlite',\r\n   storage: './database.sqlite',\r\n-  logging: false, // يمكن تفعيله لرؤية استعلامات SQL\r\n+  logging: false,\r\n });\r\n \r\n export default sequelize;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776171018719,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,9 +1,9 @@\n import { Sequelize } from 'sequelize';\r\n \r\n const sequelize = new Sequelize({\r\n   dialect: 'sqlite',\r\n-  storage: './database.sqlite',\r\n-  logging: false,\r\n+  storage: './database.sqlite', // سيتم إنشاء الملف تلقائياً\r\n+  logging: false, // يمكنك تغييره إلى console.log لرؤية استعلامات SQL\r\n });\r\n \r\n export default sequelize;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776170171052,
+            "name": "Commit-0",
+            "content": "import { Sequelize } from 'sequelize';\r\n\r\nconst sequelize = new Sequelize({\r\n  dialect: 'sqlite',\r\n  storage: './database.sqlite',\r\n  logging: false, // يمكن تفعيله لرؤية استعلامات SQL\r\n});\r\n\r\nexport default sequelize;"
+        }
+    ]
+}

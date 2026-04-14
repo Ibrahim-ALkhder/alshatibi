@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/models/Address.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776170207359,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776170804465,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -0,0 +1,18 @@\n+import { DataTypes } from 'sequelize';\r\n+import sequelize from '../config/database.js';\r\n+import User from './User.js';\r\n+\r\n+const Address = sequelize.define('Address', {\r\n+  street: DataTypes.STRING,\r\n+  city: DataTypes.STRING,\r\n+  area: DataTypes.STRING,\r\n+  building: DataTypes.STRING,\r\n+  floor: DataTypes.STRING,\r\n+  apartment: DataTypes.STRING,\r\n+  notes: DataTypes.STRING,\r\n+});\r\n+\r\n+User.hasOne(Address, { onDelete: 'CASCADE' });\r\n+Address.belongsTo(User);\r\n+\r\n+export default Address;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776170207359,
+            "name": "Commit-0",
+            "content": "\r\n"
+        }
+    ]
+}

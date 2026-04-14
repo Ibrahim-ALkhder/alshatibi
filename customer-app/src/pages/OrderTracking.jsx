@@ -5,6 +5,7 @@ import { useSocket } from '../context/SocketContext';
 import { formatPrice, formatOrderId } from '../utils/formatters';
 import Loader from '../components/UI/Loader';
 import OrderStatusBadge from '../components/Order/OrderStatusBadge';
+import { toast } from 'react-toastify';
 
 const statusSteps = [
   { key: 'Preparing', label: 'قيد التحضير' },
@@ -35,14 +36,35 @@ const OrderTracking = () => {
 
   useEffect(() => {
     if (!socket) return;
-    
+
     socket.on('orderStatusUpdated', (data) => {
-      if (data.orderId === id) {
+      if (data.orderId == id) {
         setOrder(prev => prev ? { ...prev, status: data.status } : prev);
       }
     });
-    
-    return () => socket.off('orderStatusUpdated');
+
+    socket.on('driverUnavailable', (data) => {
+      if (data.orderId == id) {
+        try {
+          toast.info(data.message, {
+            position: "top-center",
+            autoClose: 7000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "colored",
+          });
+        } catch (e) {
+          console.warn('Toast not available');
+        }
+      }
+    });
+
+    return () => {
+      socket.off('orderStatusUpdated');
+      socket.off('driverUnavailable');
+    };
   }, [socket, id]);
 
   if (loading) return <Loader fullScreen />;
@@ -54,42 +76,37 @@ const OrderTracking = () => {
   return (
     <div className="max-w-3xl mx-auto" dir="rtl">
       <h1 className="text-3xl font-bold mb-2">تتبع الطلب</h1>
-      <p className="text-gray-600 mb-6">رقم الطلب: {formatOrderId(order._id)}</p>
-      
-      {/* بطاقة حالة الطلب مع شريط التقدم */}
-      <div className="bg-primary-100/20 rounded-2xl shadow-lg p-6 mb-6">
+      <p className="text-gray-600 mb-6">رقم الطلب: {formatOrderId(order.id)}</p>
+
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
         <div className="flex justify-between items-center mb-6">
           <span className="text-lg font-medium">حالة الطلب:</span>
           <OrderStatusBadge status={order.status} />
         </div>
 
-        {/* شريط التقدم التفاعلي */}
-          <div className="relative pt-2">
-            {/* الخلفية البرتقالية الأغمق مع شفافية زجاجية */}
-            <div className="h-3 bg-primary-200 rounded-full overflow-hidden backdrop-blur-sm">
-              {/* الشريط البرتقالي مع الأنيميشن أثناء عدم التسليم */}
-              <div 
-                className={`h-full rounded-full transition-all duration-700 ease-out ${
-                  order.status !== 'Delivered' 
-                    ? 'progress-bar-gradient progress-bar-animated' 
-                    : 'progress-bar-gradient'
-                }`}
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-            
-            {/* نقاط التوقف مع التسميات */}
-            <div className="flex justify-between mt-2">
+        <div className="relative pt-2">
+          <div className="h-3 bg-primary-100 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ease-out ${
+                order.status !== 'Delivered'
+                  ? 'progress-bar-gradient progress-bar-animated'
+                  : 'progress-bar-gradient'
+              }`}
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+
+          <div className="flex justify-between mt-2">
             {statusSteps.map((step, idx) => {
               const isCompleted = idx <= currentStepIndex;
               const isCurrent = idx === currentStepIndex;
               return (
                 <div key={step.key} className="flex flex-col items-center" style={{ width: '20%' }}>
-                  <div 
+                  <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
-                      isCompleted 
-                        ? 'bg-primary-600 border-primary-600 text-white' 
-                        : 'bg-primary-100 border-primary-300 text-gray-400'
+                      isCompleted
+                        ? 'bg-primary-600 border-primary-600 text-white'
+                        : 'bg-white border-gray-300'
                     } ${isCurrent ? 'ring-4 ring-primary-200' : ''}`}
                   >
                     {isCompleted && (
@@ -115,12 +132,11 @@ const OrderTracking = () => {
           </p>
         </div>
       </div>
-      
-      {/* تفاصيل الطلب */}
+
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h2 className="text-xl font-bold mb-4">تفاصيل الطلب</h2>
         <div className="space-y-3 mb-4">
-          {order.items.map((item, idx) => (
+          {order.OrderItems?.map((item, idx) => (
             <div key={idx} className="flex justify-between">
               <span>{item.quantity} × {item.name}</span>
               <span>{formatPrice(item.price * item.quantity)}</span>

@@ -16,13 +16,13 @@ export const formatDate = (date) => {
 };
 
 export const formatOrderId = (id) => {
-  return `#${id.slice(-6).toUpperCase()}`;
+  if (!id) return '#------';
+  return `#${id.toString().slice(-6).toUpperCase()}`;
 };
 
-// دالة مساعدة للحصول على رابط الصورة الكامل
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/300?text=الشطبي';
   if (imagePath.startsWith('http')) return imagePath;
-  const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
+  const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:10000';
   return `${baseURL}${imagePath}`;
 };

@@ -6,6 +6,7 @@ import fs from 'fs';
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('✅ Created uploads directory');
 }
 
 const storage = multer.diskStorage({
@@ -13,10 +14,10 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
+  },
 });
 
 const fileFilter = (req, file, cb) => {
@@ -33,7 +34,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  fileFilter: fileFilter
+  fileFilter: fileFilter,
 });
 
 export default upload;

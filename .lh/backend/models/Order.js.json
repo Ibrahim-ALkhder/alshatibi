@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 1,
+            "activePatchIndex": 3,
             "patches": [
                 {
                     "date": 1776026828150,
@@ -12,6 +12,14 @@
                 {
                     "date": 1776060803891,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -31,8 +31,11 @@\n     paymentMethod: { type: String, enum: ['cash', 'card'], default: 'cash' },\r\n     isPaid: { type: Boolean, default: false },\r\n     paidAt: Date,\r\n     deliveredAt: Date,\r\n+    // ---------- حقول جديدة للمندوب ----------\r\n+    driver: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryDriver', default: null },\r\n+    deliveryFee: { type: Number, default: 20 },\r\n   },\r\n   { timestamps: true }\r\n );\r\n \r\n"
+                },
+                {
+                    "date": 1776170316208,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,43 +1,35 @@\n-import mongoose from 'mongoose';\r\n+import { DataTypes } from 'sequelize';\r\n+import sequelize from '../config/database.js';\r\n+import User from './User.js';\r\n+import DeliveryDriver from './DeliveryDriver.js';\r\n \r\n-const orderSchema = mongoose.Schema(\r\n-  {\r\n-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },\r\n-    items: [\r\n-      {\r\n-        menuItem: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },\r\n-        name: String,\r\n-        quantity: { type: Number, required: true },\r\n-        price: { type: Number, required: true },\r\n-        options: [{ name: String, choice: String, price: Number }],\r\n-      },\r\n-    ],\r\n-    totalPrice: { type: Number, required: true },\r\n-    deliveryAddress: {\r\n-      street: String,\r\n-      city: String,\r\n-      area: String,\r\n-      building: String,\r\n-      floor: String,\r\n-      apartment: String,\r\n-      notes: String,\r\n-    },\r\n-    phone: { type: String, required: true },\r\n-    status: {\r\n-      type: String,\r\n-      enum: ['Preparing', 'Ready', 'Out for delivery', 'Delivered'],\r\n-      default: 'Preparing',\r\n-    },\r\n-    paymentMethod: { type: String, enum: ['cash', 'card'], default: 'cash' },\r\n-    isPaid: { type: Boolean, default: false },\r\n-    paidAt: Date,\r\n-    deliveredAt: Date,\r\n-    // ---------- حقول جديدة للمندوب ----------\r\n-    driver: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryDriver', default: null },\r\n-    deliveryFee: { type: Number, default: 20 },\r\n+const Order = sequelize.define('Order', {\r\n+  totalPrice: { type: DataTypes.FLOAT, allowNull: false },\r\n+  phone: { type: DataTypes.STRING, allowNull: false },\r\n+  status: {\r\n+    type: DataTypes.ENUM('Preparing', 'Ready', 'Out for delivery', 'Delivered'),\r\n+    defaultValue: 'Preparing',\r\n   },\r\n-  { timestamps: true }\r\n-);\r\n+  paymentMethod: { type: DataTypes.ENUM('cash', 'card'), defaultValue: 'cash' },\r\n+  isPaid: { type: DataTypes.BOOLEAN, defaultValue: false },\r\n+  paidAt: DataTypes.DATE,\r\n+  deliveredAt: DataTypes.DATE,\r\n+  deliveryFee: { type: DataTypes.FLOAT, defaultValue: 20 },\r\n+}, { timestamps: true });\r\n \r\n-const Order = mongoose.model('Order', orderSchema);\r\n+User.hasMany(Order);\r\n+Order.belongsTo(User);\r\n+\r\n+// عنوان التوصيل في جدول منفصل\r\n+import OrderAddress from './OrderAddress.js';\r\n+Order.hasOne(OrderAddress, { onDelete: 'CASCADE' });\r\n+\r\n+// العناصر المطلوبة\r\n+import OrderItem from './OrderItem.js';\r\n+Order.hasMany(OrderItem, { onDelete: 'CASCADE' });\r\n+\r\n+// المندوب\r\n+DeliveryDriver.hasMany(Order);\r\n+Order.belongsTo(DeliveryDriver);\r\n+\r\n export default Order;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776170833423,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -19,17 +19,8 @@\n \r\n User.hasMany(Order);\r\n Order.belongsTo(User);\r\n \r\n-// عنوان التوصيل في جدول منفصل\r\n-import OrderAddress from './OrderAddress.js';\r\n-Order.hasOne(OrderAddress, { onDelete: 'CASCADE' });\r\n-\r\n-// العناصر المطلوبة\r\n-import OrderItem from './OrderItem.js';\r\n-Order.hasMany(OrderItem, { onDelete: 'CASCADE' });\r\n-\r\n-// المندوب\r\n DeliveryDriver.hasMany(Order);\r\n Order.belongsTo(DeliveryDriver);\r\n \r\n export default Order;\n\\ No newline at end of file\n"
                 }
             ],
             "date": 1776026828150,

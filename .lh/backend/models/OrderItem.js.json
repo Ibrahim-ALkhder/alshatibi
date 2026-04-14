@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/models/OrderItem.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1776170346707,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776170847515,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,7 +1,8 @@\n import { DataTypes } from 'sequelize';\r\n import sequelize from '../config/database.js';\r\n import MenuItem from './MenuItem.js';\r\n+import Order from './Order.js';\r\n \r\n const OrderItem = sequelize.define('OrderItem', {\r\n   name: DataTypes.STRING,\r\n   quantity: { type: DataTypes.INTEGER, allowNull: false },\r\n@@ -10,5 +11,8 @@\n \r\n MenuItem.hasMany(OrderItem);\r\n OrderItem.belongsTo(MenuItem);\r\n \r\n+Order.hasMany(OrderItem, { onDelete: 'CASCADE' });\r\n+OrderItem.belongsTo(Order);\r\n+\r\n export default OrderItem;\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1776170346707,
+            "name": "Commit-0",
+            "content": "import { DataTypes } from 'sequelize';\r\nimport sequelize from '../config/database.js';\r\nimport MenuItem from './MenuItem.js';\r\n\r\nconst OrderItem = sequelize.define('OrderItem', {\r\n  name: DataTypes.STRING,\r\n  quantity: { type: DataTypes.INTEGER, allowNull: false },\r\n  price: { type: DataTypes.FLOAT, allowNull: false },\r\n});\r\n\r\nMenuItem.hasMany(OrderItem);\r\nOrderItem.belongsTo(MenuItem);\r\n\r\nexport default OrderItem;"
+        }
+    ]
+}

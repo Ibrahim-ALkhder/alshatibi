@@ -1,43 +1,20 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
+import Category from './Category.js';
 
-const menuItemSchema = mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    nameAr: { type: String, required: true },
-    description: String,
-    descriptionAr: String,
-    price: { type: Number, required: true },
-    image: String,
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-    isAvailable: { type: Boolean, default: true },
-    stock: { type: Number, default: 0, min: 0 },
-    preparationTime: { type: Number, default: 15 },
-    options: [
-      {
-        name: String,
-        nameAr: String,
-        choices: [
-          {
-            name: String,
-            nameAr: String,
-            price: Number,
-          },
-        ],
-      },
-    ],
-  },
-  { timestamps: true }
-);
+const MenuItem = sequelize.define('MenuItem', {
+  name: { type: DataTypes.STRING, allowNull: false },
+  nameAr: { type: DataTypes.STRING, allowNull: false },
+  description: DataTypes.TEXT,
+  descriptionAr: DataTypes.TEXT,
+  price: { type: DataTypes.FLOAT, allowNull: false },
+  image: DataTypes.STRING,
+  isAvailable: { type: DataTypes.BOOLEAN, defaultValue: true },
+  stock: { type: DataTypes.INTEGER, defaultValue: 0 },
+  preparationTime: { type: DataTypes.INTEGER, defaultValue: 15 },
+}, { timestamps: true });
 
-// استخدم async function بدون next
-menuItemSchema.pre('save', async function () {
-  // تأكد من تحديث isAvailable بناءً على المخزون
-  if (this.stock <= 0) {
-    this.isAvailable = false;
-  } else {
-    this.isAvailable = true;
-  }
-});
+Category.hasMany(MenuItem, { onDelete: 'CASCADE' });
+MenuItem.belongsTo(Category);
 
-const MenuItem = mongoose.model('MenuItem', menuItemSchema);
 export default MenuItem;

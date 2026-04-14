@@ -3,11 +3,19 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 2,
             "patches": [
                 {
                     "date": 1776060701939,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1776170353327,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,15 +1,17 @@\n-import mongoose from 'mongoose';\r\n+import { DataTypes } from 'sequelize';\r\n+import sequelize from '../config/database.js';\r\n+import User from './User.js';\r\n \r\n-const deliveryDriverSchema = mongoose.Schema(\r\n-  {\r\n-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },\r\n-    status: { type: String, enum: ['available', 'busy', 'offline'], default: 'available' },\r\n-    currentOrder: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: null },\r\n-    rating: { type: Number, default: 5, min: 1, max: 5 },\r\n-    totalDeliveries: { type: Number, default: 0 },\r\n+const DeliveryDriver = sequelize.define('DeliveryDriver', {\r\n+  status: {\r\n+    type: DataTypes.ENUM('available', 'busy', 'offline'),\r\n+    defaultValue: 'available',\r\n   },\r\n-  { timestamps: true }\r\n-);\r\n+  rating: { type: DataTypes.FLOAT, defaultValue: 5 },\r\n+  totalDeliveries: { type: DataTypes.INTEGER, defaultValue: 0 },\r\n+}, { timestamps: true });\r\n \r\n-const DeliveryDriver = mongoose.model('DeliveryDriver', deliveryDriverSchema);\r\n+User.hasOne(DeliveryDriver, { onDelete: 'CASCADE' });\r\n+DeliveryDriver.belongsTo(User);\r\n+\r\n export default DeliveryDriver;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776170852770,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,8 +8,9 @@\n     defaultValue: 'available',\r\n   },\r\n   rating: { type: DataTypes.FLOAT, defaultValue: 5 },\r\n   totalDeliveries: { type: DataTypes.INTEGER, defaultValue: 0 },\r\n+  currentOrderId: { type: DataTypes.INTEGER, allowNull: true }, // للتتبع\r\n }, { timestamps: true });\r\n \r\n User.hasOne(DeliveryDriver, { onDelete: 'CASCADE' });\r\n DeliveryDriver.belongsTo(User);\r\n"
                 }
             ],
             "date": 1776060701939,

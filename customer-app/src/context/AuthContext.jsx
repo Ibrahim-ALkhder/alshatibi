@@ -78,10 +78,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateProfile = async (userData) => {
-    const { data } = await api.put('/auth/profile', userData);
-    setUser(data);
-    return data;
-  };
+  const { data } = await api.put('/auth/profile', userData);
+  // تحديث التوكن في localStorage إذا تم إرجاع واحد جديد
+  if (data.token) {
+    localStorage.setItem('token', data.token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+  }
+  setUser(data);
+  return data;
+};
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>

@@ -11,13 +11,13 @@ const roleOptions = [
   { value: 'customer', label: 'عميل' },
   { value: 'staff', label: 'موظف' },
   { value: 'admin', label: 'مدير' },
-  { value: 'driver', label: 'مندوب توصيل' }, // ← تمت الإضافة
+  { value: 'driver', label: 'مندوب توصيل' },
 ];
 
 const roleColors = {
   admin: 'bg-purple-100 text-purple-800',
   staff: 'bg-blue-100 text-blue-800',
-  driver: 'bg-orange-100 text-orange-800', // لون مميز للمندوب
+  driver: 'bg-orange-100 text-orange-800',
   customer: 'bg-gray-100 text-gray-800',
 };
 
@@ -63,7 +63,7 @@ const UsersManagement = () => {
     if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
     try {
       await api.delete(`/users/${id}`);
-      setUsers(users.filter(u => u._id !== id));
+      setUsers(users.filter((u) => u.id !== id));
     } catch (err) {
       alert(err.response?.data?.message || 'فشل الحذف');
     }
@@ -110,8 +110,8 @@ const UsersManagement = () => {
 
     try {
       if (editingUser) {
-        const { data } = await api.put(`/users/${editingUser._id}`, payload);
-        setUsers(users.map(u => u._id === editingUser._id ? data : u));
+        const { data } = await api.put(`/users/${editingUser.id}`, payload);
+        setUsers(users.map((u) => (u.id === editingUser.id ? data : u)));
       } else {
         const { data } = await api.post('/users', payload);
         setUsers([data, ...users]);
@@ -124,7 +124,7 @@ const UsersManagement = () => {
     }
   };
 
-  const selectedRole = roleOptions.find(opt => opt.value === formData.role);
+  const selectedRole = roleOptions.find((opt) => opt.value === formData.role);
 
   if (user?.role !== 'admin') return <Navigate to="/" />;
   if (loading) return <Loader fullScreen />;
@@ -149,8 +149,8 @@ const UsersManagement = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map(u => (
-              <tr key={u._id}>
+            {users.map((u) => (
+              <tr key={u.id}>
                 <td className="px-4 py-2">{u.name}</td>
                 <td className="px-4 py-2">{u.email}</td>
                 <td className="px-4 py-2">{u.phone}</td>
@@ -164,7 +164,7 @@ const UsersManagement = () => {
                   <button onClick={() => handleEdit(u)} className="text-blue-600 hover:underline ml-2">
                     تعديل
                   </button>
-                  <button onClick={() => handleDelete(u._id)} className="text-red-600 hover:underline">
+                  <button onClick={() => handleDelete(u.id)} className="text-red-600 hover:underline">
                     حذف
                   </button>
                 </td>

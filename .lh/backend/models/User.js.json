@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 3,
+            "activePatchIndex": 5,
             "patches": [
                 {
                     "date": 1776014041519,
@@ -20,6 +20,14 @@
                 {
                     "date": 1776061704318,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,9 +15,9 @@\n       floor: String,\r\n       apartment: String,\r\n       notes: String,\r\n     },\r\n-    role: { type: String, enum: ['customer', 'admin', 'staff'], default: 'customer' },\r\n+    role: { type: String, enum: ['customer', 'admin', 'staff', 'driver'], default: 'customer' },\r\n   },\r\n   { timestamps: true }\r\n );\r\n \r\n"
+                },
+                {
+                    "date": 1776170188021,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,39 +1,38 @@\n-import mongoose from 'mongoose';\r\n+import { DataTypes } from 'sequelize';\r\n+import sequelize from '../config/database.js';\r\n import bcrypt from 'bcryptjs';\r\n \r\n-const userSchema = mongoose.Schema(\r\n-  {\r\n-    name: { type: String, required: true },\r\n-    email: { type: String, required: true, unique: true },\r\n-    password: { type: String, required: true },\r\n-    phone: { type: String, required: true },\r\n-    address: {\r\n-      street: String,\r\n-      city: String,\r\n-      area: String,\r\n-      building: String,\r\n-      floor: String,\r\n-      apartment: String,\r\n-      notes: String,\r\n+const User = sequelize.define('User', {\r\n+  name: { type: DataTypes.STRING, allowNull: false },\r\n+  email: { type: DataTypes.STRING, allowNull: false, unique: true },\r\n+  password: { type: DataTypes.STRING, allowNull: false },\r\n+  phone: { type: DataTypes.STRING, allowNull: false },\r\n+  role: {\r\n+    type: DataTypes.ENUM('customer', 'admin', 'staff', 'driver'),\r\n+    defaultValue: 'customer',\r\n+  },\r\n+  // العنوان سيكون في جدول منفصل (Address) لاحقًا\r\n+}, {\r\n+  timestamps: true,\r\n+  hooks: {\r\n+    beforeCreate: async (user) => {\r\n+      if (user.password) {\r\n+        const salt = await bcrypt.genSalt(10);\r\n+        user.password = await bcrypt.hash(user.password, salt);\r\n+      }\r\n     },\r\n-    role: { type: String, enum: ['customer', 'admin', 'staff', 'driver'], default: 'customer' },\r\n+    beforeUpdate: async (user) => {\r\n+      if (user.changed('password')) {\r\n+        const salt = await bcrypt.genSalt(10);\r\n+        user.password = await bcrypt.hash(user.password, salt);\r\n+      }\r\n+    },\r\n   },\r\n-  { timestamps: true }\r\n-);\r\n-\r\n-// تشفير كلمة المرور قبل الحفظ\r\n-userSchema.pre('save', async function () {\r\n-  if (!this.isModified('password')) {\r\n-    return;\r\n-  }\r\n-  const salt = await bcrypt.genSalt(10);\r\n-  this.password = await bcrypt.hash(this.password, salt);\r\n });\r\n \r\n-// مقارنة كلمة المرور المدخلة مع المخزنة\r\n-userSchema.methods.matchPassword = async function (enteredPassword) {\r\n+// دالة مقارنة كلمة المرور\r\n+User.prototype.matchPassword = async function (enteredPassword) {\r\n   return await bcrypt.compare(enteredPassword, this.password);\r\n };\r\n \r\n-const User = mongoose.model('User', userSchema);\r\n export default User;\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1776170796599,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -10,9 +10,8 @@\n   role: {\r\n     type: DataTypes.ENUM('customer', 'admin', 'staff', 'driver'),\r\n     defaultValue: 'customer',\r\n   },\r\n-  // العنوان سيكون في جدول منفصل (Address) لاحقًا\r\n }, {\r\n   timestamps: true,\r\n   hooks: {\r\n     beforeCreate: async (user) => {\r\n@@ -29,9 +28,8 @@\n     },\r\n   },\r\n });\r\n \r\n-// دالة مقارنة كلمة المرور\r\n User.prototype.matchPassword = async function (enteredPassword) {\r\n   return await bcrypt.compare(enteredPassword, this.password);\r\n };\r\n \r\n"
                 }
             ],
             "date": 1776014041519,

@@ -1,15 +1,18 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
+import User from './User.js';
 
-const deliveryDriverSchema = mongoose.Schema(
-  {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, enum: ['available', 'busy', 'offline'], default: 'available' },
-    currentOrder: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: null },
-    rating: { type: Number, default: 5, min: 1, max: 5 },
-    totalDeliveries: { type: Number, default: 0 },
+const DeliveryDriver = sequelize.define('DeliveryDriver', {
+  status: {
+    type: DataTypes.ENUM('available', 'busy', 'offline'),
+    defaultValue: 'available',
   },
-  { timestamps: true }
-);
+  rating: { type: DataTypes.FLOAT, defaultValue: 5 },
+  totalDeliveries: { type: DataTypes.INTEGER, defaultValue: 0 },
+  currentOrderId: { type: DataTypes.INTEGER, allowNull: true }, // للتتبع
+}, { timestamps: true });
 
-const DeliveryDriver = mongoose.model('DeliveryDriver', deliveryDriverSchema);
+User.hasOne(DeliveryDriver, { onDelete: 'CASCADE' });
+DeliveryDriver.belongsTo(User);
+
 export default DeliveryDriver;

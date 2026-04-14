@@ -34,9 +34,7 @@ const Menu = () => {
   // تصفية العناصر حسب الفئة والبحث
   const filteredItems = menuItems.filter(item => {
     // فلترة الفئة
-    const matchesCategory = selectedCategory === 'all' || item.category?._id === selectedCategory;
-    
-    // فلترة البحث (إذا لم يكن هناك نص بحث، نتجاوز)
+const matchesCategory = selectedCategory === 'all' || item.Category?.id === selectedCategory    // فلترة البحث (إذا لم يكن هناك نص بحث، نتجاوز)
     if (!searchTerm.trim()) return matchesCategory;
     
     const searchLower = searchTerm.toLowerCase().trim();
@@ -88,9 +86,9 @@ const Menu = () => {
           الكل
         </button>
         {categories.map(cat => (
-          <button
-            key={cat._id}
-            onClick={() => setSelectedCategory(cat._id)}
+  <button
+    key={cat.id}
+    onClick={() => setSelectedCategory(cat.id)}
             className={`px-5 py-2 rounded-full whitespace-nowrap transition-colors text-base ${
               selectedCategory === cat._id
                 ? 'bg-primary-600 text-white shadow-md'
