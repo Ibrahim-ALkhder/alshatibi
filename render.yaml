@@ -1,12 +1,11 @@
 databases:
-  # PostgreSQL Database
   - name: alshatibi-db
     region: frankfurt
     plan: free
     databaseName: alshatibi
 
 services:
-  # Backend Service
+  # Backend Service (يبقى كما هو)
   - type: web
     name: alshatibi-backend
     env: node
@@ -27,14 +26,10 @@ services:
           name: alshatibi-db
           property: connectionString
     healthCheckPath: /api/health
-    # ❌ تمت إزالة قسم disk بالكامل
 
-  # Frontend Service
-  - type: web
+  # Frontend Service (نوع static بدون plan)
+  - type: static
     name: alshatibi-frontend
-    env: static
-    # ❌ تمت إزالة region (غير مسموح لـ static)
-    plan: free
     rootDir: customer-app
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
