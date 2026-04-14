@@ -9,7 +9,9 @@
       "Read(//cygdrive/c/Program Files/**)",
       "WebFetch(domain:customer-app-8kys.onrender.com)",
       "Bash(curl -v https://alshatibi-backend.onrender.com/api/auth/login)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
