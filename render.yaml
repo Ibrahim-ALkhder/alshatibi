@@ -1,11 +1,11 @@
-services:
+databases:
   # PostgreSQL Database
-  - type: postgres
-    name: alshatibi-db
+  - name: alshatibi-db
     region: frankfurt
     plan: free
     databaseName: alshatibi
 
+services:
   # Backend Service
   - type: web
     name: alshatibi-backend
