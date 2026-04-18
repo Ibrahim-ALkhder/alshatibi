@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  // استبدل الرابط أدناه برابط الـ Backend الحقيقي الخاص بك على Render
+  baseURL: import.meta.env.VITE_API_URL || 'https://alshatibi-backend.onrender.com/api',
 });
 
 api.interceptors.request.use(
