@@ -7,7 +7,7 @@ const Home = () => {
   return (
     <div className="text-center py-8 md:py-16">
       <h1 className="text-4xl md:text-5xl font-bold text-primary-600 mb-4">
-        مرحباً {user?.name} في الشطبي
+        مرحباً {user?.name} في مطعم 
       </h1>
       <p className="text-xl text-gray-600 mb-8">
         أشهى المأكولات السودانية في قلب القاهرة

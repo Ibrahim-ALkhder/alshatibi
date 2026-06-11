@@ -8,6 +8,7 @@ import Input from '../components/UI/Input';
 import Select from 'react-select';
 
 const roleOptions = [
+  { value: 'all', label: 'الكل' },
   { value: 'customer', label: 'عميل' },
   { value: 'staff', label: 'موظف' },
   { value: 'admin', label: 'مدير' },
@@ -43,6 +44,10 @@ const UsersManagement = () => {
   });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // حالات البحث والتصفية
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
 
   useEffect(() => {
     fetchUsers();
@@ -124,6 +129,20 @@ const UsersManagement = () => {
     }
   };
 
+  // تصفية المستخدمين حسب البحث والدور
+  const filteredUsers = users.filter((u) => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    const matchesSearch =
+      !searchLower ||
+      u.name?.toLowerCase().includes(searchLower) ||
+      u.email?.toLowerCase().includes(searchLower) ||
+      roleLabels[u.role]?.toLowerCase().includes(searchLower);
+
+    const matchesRole = filterRole === 'all' || u.role === filterRole;
+
+    return matchesSearch && matchesRole;
+  });
+
   const selectedRole = roleOptions.find((opt) => opt.value === formData.role);
 
   if (user?.role !== 'admin') return <Navigate to="/" />;
@@ -131,55 +150,93 @@ const UsersManagement = () => {
 
   return (
     <div dir="rtl" className="p-4 md:p-6">
-      <div className="flex justify-between items-center mb-6">
+      {/* العنوان والزر */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-3xl font-bold">إدارة المستخدمين</h1>
-        <Button onClick={handleAddNew} variant="primary">+ إضافة مستخدم جديد</Button>
+        <Button
+          onClick={handleAddNew}
+          variant="primary"
+          className="text-sm md:text-lg py-2 px-4 md:py-3 md:px-6 self-end sm:self-auto"
+        >
+          + إضافة مستخدم جديد
+        </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-right">الاسم</th>
-              <th className="px-4 py-3 text-right">البريد الإلكتروني</th>
-              <th className="px-4 py-3 text-right">الهاتف</th>
-              <th className="px-4 py-3 text-right">الدور</th>
-              <th className="px-4 py-3 text-right">تاريخ التسجيل</th>
-              <th className="px-4 py-3 text-right">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td className="px-4 py-2">{u.name}</td>
-                <td className="px-4 py-2">{u.email}</td>
-                <td className="px-4 py-2">{u.phone}</td>
-                <td className="px-4 py-2">
-                  <span className={`px-2 py-1 rounded text-sm ${roleColors[u.role] || 'bg-gray-100 text-gray-800'}`}>
-                    {roleLabels[u.role] || u.role}
-                  </span>
-                </td>
-                <td className="px-4 py-2">{new Date(u.createdAt).toLocaleDateString('ar-EG')}</td>
-                <td className="px-4 py-2 space-x-2 space-x-reverse">
-                  <button onClick={() => handleEdit(u)} className="text-blue-600 hover:underline ml-2">
-                    تعديل
-                  </button>
-                  <button onClick={() => handleDelete(u.id)} className="text-red-600 hover:underline">
-                    حذف
-                  </button>
-                </td>
+      {/* شريط البحث والتصفية */}
+      <div className="bg-white rounded-xl p-4 mb-6 shadow-sm flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <Input
+            placeholder="ابحث باسم، بريد، أو دور..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="text-sm"
+          />
+        </div>
+        <div className="w-full sm:w-48">
+          <Select
+            options={roleOptions}
+            value={roleOptions.find((opt) => opt.value === filterRole)}
+            onChange={(option) => setFilterRole(option.value)}
+            placeholder="تصفية حسب الدور"
+            isSearchable={false}
+          />
+        </div>
+      </div>
+
+      {/* جدول / كروت المستخدمين */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="table-wrapper">
+          <table className="min-w-full divide-y divide-gray-200 responsive-card-table">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-right">الاسم</th>
+                <th className="px-4 py-3 text-right">البريد الإلكتروني</th>
+                <th className="px-4 py-3 text-right">الهاتف</th>
+                <th className="px-4 py-3 text-right">الدور</th>
+                <th className="px-4 py-3 text-right">تاريخ التسجيل</th>
+                <th className="px-4 py-3 text-right">إجراءات</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredUsers.map((u) => (
+                <tr key={u.id}>
+                  <td data-label="الاسم">{u.name}</td>
+                  <td data-label="البريد">{u.email}</td>
+                  <td data-label="الهاتف">{u.phone}</td>
+                  <td data-label="الدور">
+                    <span className={`px-2 py-1 rounded text-sm ${roleColors[u.role] || 'bg-gray-100 text-gray-800'}`}>
+                      {roleLabels[u.role] || u.role}
+                    </span>
+                  </td>
+                  <td data-label="تاريخ التسجيل">
+                    {new Date(u.createdAt).toLocaleDateString('ar-EG')}
+                  </td>
+                  <td data-label="إجراءات">
+                    <button onClick={() => handleEdit(u)} className="text-blue-600 hover:underline ml-2">
+                      تعديل
+                    </button>
+                    <button onClick={() => handleDelete(u.id)} className="text-red-600 hover:underline">
+                      حذف
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {filteredUsers.length === 0 && (
+          <div className="text-center py-8 text-gray-500">لا يوجد مستخدمين مطابقين للبحث</div>
+        )}
       </div>
 
-      {/* Modal */}
+      {/* Modal للإضافة / التعديل */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-4">{editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم جديد'}</h2>
+              <h2 className="text-2xl font-bold mb-4">
+                {editingUser ? 'تعديل مستخدم' : 'إضافة مستخدم جديد'}
+              </h2>
               <form onSubmit={handleSubmit}>
                 {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
 
@@ -212,7 +269,7 @@ const UsersManagement = () => {
                 <div className="mb-4">
                   <label className="block mb-1 font-medium">الدور</label>
                   <Select
-                    options={roleOptions}
+                    options={roleOptions.filter(opt => opt.value !== 'all')}
                     value={selectedRole}
                     onChange={(option) => setFormData({ ...formData, role: option.value })}
                     placeholder="اختر الدور"

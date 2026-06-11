@@ -65,20 +65,20 @@ function App() {
             </>
           )}
 
-          {/* Staff / Admin routes */}
-          {(isStaff || isAdmin) && (
-            <>
-              <Route index element={<Navigate to={isAdmin ? "dashboard" : "staff/orders"} />} />
-              <Route path="staff/orders" element={<StaffOrders />} />
-              <Route path="menu-management" element={<MenuManagement />} />
-              {isAdmin && (
-                <>
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="users" element={<UsersManagement />} />
-                </>
-              )}
-            </>
-          )}
+         {/* Staff / Admin routes */}
+{(isStaff || isAdmin) && (
+  <>
+    <Route index element={<Navigate to={isAdmin ? "dashboard" : "staff/orders"} />} />
+    <Route path="staff/orders" element={<StaffOrders />} />
+    <Route path="menu-management" element={<MenuManagement />} /> {/* هذا موجود بالفعل للموظف والمدير */}
+    {isAdmin && (
+      <>
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="users" element={<UsersManagement />} />
+      </>
+    )}
+  </>
+)}
 
           {/* Driver routes */}
           {isDriver && (

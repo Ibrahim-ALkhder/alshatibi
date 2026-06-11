@@ -1,0 +1,17 @@
+
+      name: 'موظف المطبخ',
+      email: 'staff@alshatibi.com',
+      password: '123456',
+     
+         name: 'مندوب التوصيل',
+      email: 'driver@alshatibi.com',
+      password: '123456',
+           name: 'عميل تجريبي',
+      email: 'customer@alshatibi.com',
+      password: '123456',
+      name: 'مدير النظام',
+        email: 'admin@alshatibi.com',
+        password: '123456',
+        name: 'مندوب التوصيل',
+        email: 'driver@alshatibi.com',
+        password: '123456',

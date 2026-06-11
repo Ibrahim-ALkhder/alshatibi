@@ -9,7 +9,7 @@ const CartItem = ({ item, index, onUpdateQuantity, onRemove }) => {
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 border-b">
       <div className="flex items-center space-x-4 space-x-reverse">
         <img
-          src={item.image || 'https://via.placeholder.com/80?text=الشطبي'}
+          src={item.image || 'https://via.placeholder.com/80?text=مطعم '}
           alt={item.name}
           className="w-20 h-20 object-cover rounded"
         />

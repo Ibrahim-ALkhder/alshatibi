@@ -19,25 +19,25 @@ const Navbar = () => {
 
   // روابط العميل (تظهر في شريط سفلي للعميل أو القائمة الجانبية)
   const customerNavLinks = [
-    { to: '/', label: '🏠 الرئيسية' },
-    { to: '/menu', label: '🍽️ القائمة' },
-    { to: '/orders', label: '📦 طلباتي' },
+    { to: '/', label: ' االرئيسية' },
+    { to: '/menu', label: ' االقائمة' },
+    { to: '/orders', label: ' ططلباتي' },
   ];
 
   // روابط الإدارة (للشاشات الكبيرة - في الشريط العلوي)
   const getAdminNavLinks = () => {
     if (isAdmin) {
       return [
-        { to: '/dashboard', label: '📊 الإحصائيات' },
-        { to: '/staff/orders', label: '📋 الطلبات' },
-        { to: '/menu-management', label: '🍽️ القائمة' },
-        { to: '/users', label: '👥 المستخدمين' },
+        { to: '/dashboard', label: ' االإحصائيات' },
+        { to: '/staff/orders', label: ' االطلبات' },
+        { to: '/menu-management', label: ' االقائمة' },
+        { to: '/users', label: ' االمستخدمين' },
       ];
     }
     if (isStaff) {
       return [
-        { to: '/staff/orders', label: '📋 الطلبات' },
-        { to: '/menu-management', label: '🍽️ القائمة' },
+        { to: '/staff/orders', label: ' الطلبات' },
+        { to: '/menu-management', label: ' القائمة' },
       ];
     }
     return [];
@@ -50,8 +50,8 @@ const Navbar = () => {
     const links = [];
     if (isCustomer) links.push(...customerNavLinks);
     if (isAdmin || isStaff) links.push(...adminNavLinks);
-    if (isDriver) links.push({ to: '/driver', label: '🛵 لوحة المندوب' });
-    links.push({ to: '/profile', label: '👤 الملف الشخصي' });
+    if (isDriver) links.push({ to: '/driver', label: ' لوحة المندوب' });
+    links.push({ to: '/profile', label: ' الملف الشخصي' });
     return links;
   };
 
@@ -89,7 +89,7 @@ const Navbar = () => {
                 to={isAdmin ? '/dashboard' : isStaff ? '/staff/orders' : isDriver ? '/driver' : '/'}
                 className="text-xl lg:text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors whitespace-nowrap"
               >
-                الشطبي
+                مطعم 
               </Link>
             </div>
 
@@ -239,7 +239,7 @@ const Navbar = () => {
           aria-label="القائمة الرئيسية"
         >
           <div className="flex justify-between items-center p-5 border-b">
-            <h2 className="text-2xl font-bold text-primary-600">الشطبي</h2>
+            <h2 className="text-2xl font-bold text-primary-600">مطعم </h2>
             <button
               onClick={closeDrawer}
               className="p-2 text-gray-700 hover:text-primary-600 transition-colors rounded-full hover:bg-gray-100"
@@ -283,6 +283,41 @@ const Navbar = () => {
       </div>
     </>
   );
+};
+{/* روابط تظهر في قائمة المستخدم لكل دور */}
+const getUserMenuLinks = () => {
+  if (isAdmin) {
+    return [
+      { to: '/dashboard', label: 'الإحصائيات والتقارير' },
+      { to: '/staff/orders', label: 'لوحة متابعة الطلبات' },
+      { to: '/menu-management', label: 'إدارة القائمة' },
+      { to: '/users', label: 'إدارة المستخدمين' },
+    ];
+  }
+  if (isStaff) {
+    return [
+      { to: '/staff/orders', label: 'لوحة متابعة الطلبات' },
+      { to: '/menu-management', label: 'إدارة القائمة' }, // ✅ يجب أن يكون موجوداً
+    ];
+  }
+  return [];
+};
+const getAdminQuickLinks = () => {
+  if (isAdmin) {
+    return [
+      { to: '/dashboard', label: ' الإحصائيات' },
+      { to: '/staff/orders', label: '📋 الطلبات' },
+      { to: '/menu-management', label: '🍽️ القائمة' },
+      { to: '/users', label: '👥 المستخدمين' },
+    ];
+  }
+  if (isStaff) {
+    return [
+      { to: '/staff/orders', label: '📋 الطلبات' },
+      { to: '/menu-management', label: '🍽️ القائمة' }, // ✅ يجب أن يكون موجوداً
+    ];
+  }
+  return [];
 };
 
 export default Navbar;

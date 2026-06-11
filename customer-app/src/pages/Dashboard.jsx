@@ -115,7 +115,7 @@ const Dashboard = () => {
     const ws = XLSX.utils.json_to_sheet(dataForExcel);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'المبيعات');
-    XLSX.writeFile(wb, `مبيعات_الشطبي_${new Date().toLocaleDateString()}.xlsx`);
+    XLSX.writeFile(wb, `مبيعات_مطعم _${new Date().toLocaleDateString()}.xlsx`);
   };
 
   // تجهيز بيانات الرسم البياني الشريطي

@@ -21,7 +21,7 @@ export const formatOrderId = (id) => {
 };
 
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return 'https://via.placeholder.com/300?text=الشطبي';
+  if (!imagePath) return 'https://via.placeholder.com/300?text=مطعم ';
   if (imagePath.startsWith('http')) return imagePath;
   const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:10000';
   return `${baseURL}${imagePath}`;

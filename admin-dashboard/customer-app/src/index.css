@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RTL Support */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}

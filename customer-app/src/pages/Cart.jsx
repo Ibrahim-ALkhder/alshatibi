@@ -31,8 +31,8 @@ const Cart = () => {
         <div className="divide-y">
           {items.map((item, index) => (
             <div
-              key={`${item.menuItem}-${index}`}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4"
+                key={`${item.menuItem}-${index}`}
+                className="cart-item-row flex flex-col sm:flex-row items-start sm:items-center justify-between py-4"
             >
               <div className="flex items-center space-x-4 space-x-reverse">
                 <img
