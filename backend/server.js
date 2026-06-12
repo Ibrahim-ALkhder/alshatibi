@@ -12,8 +12,10 @@ app.use(express.urlencoded({ extended: true }));
 
 let moduleError = null;
 
+let dbError = null;
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), moduleError });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), moduleError, dbError });
 });
 
 httpServer.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT}`));
@@ -57,6 +59,7 @@ if (authRoutes) {
     console.log('SQLite connected');
     await sequelize.sync();
   } catch (dbErr) {
+    dbError = dbErr.message;
     console.error('DB init error:', dbErr.message);
   }
 }
