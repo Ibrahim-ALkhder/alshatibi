@@ -10,8 +10,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+let moduleError = null;
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), moduleError });
 });
 
 httpServer.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT}`));
@@ -35,7 +37,8 @@ try {
   errorHandler = (await import('./middleware/errorMiddleware.js')).errorHandler;
   initSocket = (await import('./socket/index.js')).initSocket;
 } catch (err) {
-  console.error('[SERVER] Module loading failed:', err.message, err.stack);
+  moduleError = { message: err.message, stack: err.stack };
+  console.error('[SERVER] Module loading failed:', err.message);
 }
 
 if (authRoutes) {
